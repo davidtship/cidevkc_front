@@ -1,0 +1,1 @@
+import{j as s}from"./index-85ab92a3.js";import{H as d}from"./Helmet-b036da4a.js";const t=({subName:r,title:e,addedChild:m})=>s.jsxs(s.Fragment,{children:[s.jsx(d,{children:s.jsxs("title",{children:[e," | Window - React Admin & Dashboard"]})}),r&&s.jsx("div",{className:"mt-2 mb-4 mb-md-6",children:s.jsx("h4",{className:"fw-semibold",children:e})})]});export{t as P};
