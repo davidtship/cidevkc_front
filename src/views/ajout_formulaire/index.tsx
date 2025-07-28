@@ -8,12 +8,12 @@ const QUESTION_TYPES = {
   CHECKBOXES: 'checkboxes',
 } as const;
 
-interface Question {
+type Question = {
   id: number;
   label: string;
-  type: keyof typeof QUESTION_TYPES;
+  type: (typeof QUESTION_TYPES)[keyof typeof QUESTION_TYPES]; // ✅ les valeurs, pas les clés
   options?: string[];
-}
+};
 
 interface Section {
   id: number;

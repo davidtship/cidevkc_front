@@ -1,6 +1,6 @@
 import { Card, Row, Col } from 'react-bootstrap'
 import Saving from '@/components/Misc/Saving.jsx'
-import { NotificationEmail, NotificationPush, NotificationsMisc } from './Components.tsx/index.tsx'
+import { NotificationEmail, NotificationPush, NotificationsMisc } from './Components.tsx/index'
 
 const NotificationsComponent = () => {
   return (

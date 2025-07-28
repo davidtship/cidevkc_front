@@ -1,65 +1,66 @@
-import { useEffect, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { useEffect, useState, FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuthContext } from '@/common'
 import AuthLayout from '@/Layouts/AuthLayout'
 import TitleHelmet from '@/components/Common/TitleHelmet'
 import { Button, Form, Stack } from 'react-bootstrap'
 import AuthMinmal from './AuthMinmal'
 import Alert from '@mui/material/Alert'
-import { useNavigate } from 'react-router-dom'
 
-const Login = () => {
-  const [loading, setLoading] = useState(false)
+const Login: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(false)
   const [rememberMe, setRememberMe] = useState<boolean>(false)
   const [emailError, setEmailError] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  async function submitHandler(e) {
+  async function submitHandler(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const fd = new FormData(e.target)
+    const fd = new FormData(e.currentTarget)
 
-    if (fd.get('username') != '' && fd.get('password') != '') {
+    const username = fd.get('username')?.toString() || ''
+    const password = fd.get('password')?.toString() || ''
+
+    if (username !== '' && password !== '') {
       const formData = {
-        email: fd.get('username'),
-        password: fd.get('password'),
+        email: username,
+        password: password,
       }
 
-      const res = await fetch('http://localhost:8000/auth/jwt/create/', {
-        method: 'POST',
-        body: JSON.stringify(formData),
-        headers: {
-          'Content-Type': 'application/json ',
-        },
-      })
-      const resData = await res.json()
-      console.log(resData)
-      if (resData.email == fd.get('username')) {
-        var access = resData.access
-        var profil = resData.image
-        var firstname = resData.first_name
-        var lastname = resData.last_name
-        var id = resData.id
-        document.cookie = 'access' + '=' + access + ';' + ' path=/'
-        document.cookie = 'profilpicpath' + '=' + profil + ';' + ' path=/'
-        document.cookie = 'firstname' + '=' + firstname + ';' + ' path=/'
-        document.cookie = 'lastname' + '=' + lastname + ';' + ' path=/'
-        document.cookie = 'id' + '=' + id + ';' + ' path=/'
-        alert('Connexion reussi !!')
+      try {
+        const res = await fetch('http://localhost:8000/auth/jwt/create/', {
+          method: 'POST',
+          body: JSON.stringify(formData),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
 
-        navigate('/')
-      } else if (resData.detail == 'No active account found with the given credentials') {
-        alert('Votre compte a ete desactiver vous ne pouver pas vous connecter')
-      } else if (resData.error == '21') {
-        alert('Vous ne pouvez pas vous connecter avec cet equipement')
-      } else {
-        alert('Mot de passe ou utilisateur incorrectes !!')
+        const resData = await res.json()
+
+        if (resData.email === username) {
+          const { access, image, first_name, last_name, id } = resData
+          document.cookie = `access=${access}; path=/`
+          document.cookie = `profilpicpath=${image}; path=/`
+          document.cookie = `firstname=${first_name}; path=/`
+          document.cookie = `lastname=${last_name}; path=/`
+          document.cookie = `id=${id}; path=/`
+          alert('Connexion réussie !!')
+          navigate('/')
+        } else if (
+          resData.detail === 'No active account found with the given credentials'
+        ) {
+          alert('Votre compte a été désactivé, vous ne pouvez pas vous connecter')
+        } else if (resData.error === '21') {
+          alert('Vous ne pouvez pas vous connecter avec cet équipement')
+        } else {
+          alert('Mot de passe ou utilisateur incorrect !!')
+        }
+      } catch (error) {
+        console.error('Login error:', error)
+        alert('Erreur lors de la connexion')
       }
-      var access = resData.access
-      var refresh = resData.refresh
-      document.cookie = 'access' + '=' + access + ';' + ' path=/'
     } else {
-      ;<Alert severity="success">Veuillez remplir tout les champs!!!</Alert>
-      alert('Veuillez remplir tout les champs!!!')
+      alert('Veuillez remplir tous les champs !!!')
     }
   }
 
@@ -68,12 +69,12 @@ const Login = () => {
       <TitleHelmet title="Login" />
       <AuthLayout>
         <AuthMinmal>
-          <div className="">
-            <h4 className="fw-bold ">Connectez-vous à votre compte</h4>
-            <p className="">Entrez vos coordonnées pour vous connecter à votre compte.</p>
+          <div>
+            <h4 className="fw-bold">Connectez-vous à votre compte</h4>
+            <p>Entrez vos coordonnées pour vous connecter à votre compte.</p>
           </div>
           <Form onSubmit={submitHandler}>
-            <Form.Group className="">
+            <Form.Group>
               <Form.Control
                 type="text"
                 placeholder="Email"
@@ -81,8 +82,11 @@ const Login = () => {
                 name="username"
                 id="username"
               />
-              <Form.Control.Feedback type="invalid">{emailError}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">
+                {emailError}
+              </Form.Control.Feedback>
             </Form.Group>
+
             <Form.Group className="mb-3 position-relative">
               <Form.Control
                 type="password"
@@ -92,6 +96,7 @@ const Login = () => {
                 required
               />
             </Form.Group>
+
             <Stack direction="horizontal">
               <Form.Check type="checkbox" id="check-api-checkbox">
                 <Form.Check.Input
@@ -102,16 +107,15 @@ const Login = () => {
                 <Form.Check.Label>Se souvenir</Form.Check.Label>
               </Form.Check>
               <Link to="/auth/minimal/forgot-password" className="link-primary ms-auto">
-                Mot de passe oublié?
+                Mot de passe oublié ?
               </Link>
             </Stack>
+
             <div className="d-grid gap-2 my-4">
               <Button type="submit" variant="primary" className="text-white">
                 Se connecter
               </Button>
             </div>
-
-            <div className="d-grid flex-wrap d-sm-flex gap-2"></div>
           </Form>
         </AuthMinmal>
       </AuthLayout>

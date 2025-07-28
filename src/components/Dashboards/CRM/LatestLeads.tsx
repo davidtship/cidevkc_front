@@ -1,13 +1,10 @@
 import { Link } from 'react-router-dom'
-import Avatar from '@/components/UiElements/Base/Avatars/Avatar'
 import { Card, Dropdown, DropdownDivider, Table, Button, Pagination } from 'react-bootstrap'
 
 // Avatar Images
 import avatar1 from '@/assets/images/avatars/1.png'
 import avatar2 from '@/assets/images/avatars/2.png'
 import avatar3 from '@/assets/images/avatars/3.png'
-import avatar4 from '@/assets/images/avatars/4.png'
-import avatar5 from '@/assets/images/avatars/5.png'
 
 const LatestLeads = () => {
   const leads = [

@@ -1,26 +1,41 @@
-import { Button, Col, Dropdown, DropdownDivider, Card, Table, Pagination } from 'react-bootstrap'
+import {
+  Button,
+  Col,
+  Dropdown,
+  DropdownDivider,
+  Card,
+  Table,
+  Pagination,
+} from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-const style1 = {
+type User = {
+  id: number
+  first_name: string
+  last_name: string
+  email: string
+  type_user: string
+  date_joined: string
+}
+
+const style1: React.CSSProperties = {
   marginBottom: '3%',
 }
 
 const Formulaire = () => {
-  const [data, setData] = useState([])
+  const [data, setData] = useState<User[]>([])
   const navigate = useNavigate()
 
-  // Get cookie value by name
-  function getCookie(name: string) {
+  function getCookie(name: string): string {
     const value = `; ${document.cookie}`
     const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) return parts.pop().split(';').shift()
+    if (parts.length === 2) return parts.pop()?.split(';').shift() || ''
     return ''
   }
 
   const token = getCookie('access')
 
-  // Fetch data from API
   useEffect(() => {
     async function fetchData() {
       try {
@@ -31,9 +46,8 @@ const Formulaire = () => {
             Authorization: `Bearer ${token}`,
           },
         })
-        const resData = await res.json()
+        const resData: User[] = await res.json()
         setData(resData)
-        console.log(JSON.stringify(resData))
       } catch (err) {
         console.error('Failed to fetch data:', err)
       }
@@ -51,11 +65,11 @@ const Formulaire = () => {
         variant="primary">
         Ajouter
       </Button>
+
       <Col xl={12}>
         <Card>
           <Card.Header className="d-flex justify-content-between align-items-center">
             <Card.Title>Liste des utilisateurs</Card.Title>
-
             <Dropdown className="ms-auto">
               <Dropdown.Toggle variant="light" className="p-0 btn-icon btn-md arrow-none">
                 <i className="fi fi-bs-menu-dots-vertical"></i>
@@ -84,32 +98,30 @@ const Formulaire = () => {
             <tbody>
               {data.length === 0 ? (
                 <tr>
-                 <td colSpan={6} className="text-center text-muted">
-                    Aucun formulaire trouvé.
+                  <td colSpan={7} className="text-center text-muted">
+                    Aucun utilisateur trouvé.
                   </td>
                 </tr>
               ) : (
-                data.map(({ id, first_name, last_name, type_user, email, date_joined }, index) => (
-                  <tr key={index}>
+                data.map(({ id, first_name, last_name, email, type_user, date_joined }, index) => (
+                  <tr key={id}>
                     <td>{index + 1}</td>
                     <td>{first_name}</td>
                     <td>{last_name}</td>
                     <td>{email}</td>
                     <td>{type_user}</td>
-
                     <td>
-                      <Link to={`/voir_reponses/1`}>
+                      <Link to={`/voir_reponses/${id}`}>
                         <Button className="me-2" variant="success">
                           Voir
                         </Button>
                       </Link>
-                      <Link to={`/voir_reponses/1`}>
+                      <Link to={`/voir_reponses/${id}`}>
                         <Button className="me-2" variant="primary">
                           Activer
                         </Button>
                       </Link>
                     </td>
-
                     <td>{date_joined}</td>
                   </tr>
                 ))

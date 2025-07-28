@@ -17,6 +17,7 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": false,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]

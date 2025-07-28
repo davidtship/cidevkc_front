@@ -1,8 +1,7 @@
 import {  Col, Card } from 'react-bootstrap';
-import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
-
+import { useParams } from "react-router"
 interface Form {
   title: string;
   categories?: Category[];

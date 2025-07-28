@@ -31,7 +31,7 @@ const style1: React.CSSProperties = {
 
 const Formulaire: React.FC = () => {
   const [data, setData] = useState<FormData[]>([])
-  const navigate = useNavigate()
+ 
 
   // Get cookie value by name
   function getCookie(name: string): string {
