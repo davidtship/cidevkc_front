@@ -1,31 +1,19 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
+    "target": "ESNext",
+    "module": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "jsx": "react-jsx",                        // JSX transform (React 17+)
+    "jsx": "react-jsx",
     "moduleResolution": "node",
-    "esModuleInterop": true,                   // ✅ Corrige TS1259
-    "allowSyntheticDefaultImports": true,      // ✅ Pour importations par défaut
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true,                      // ✅ Ignore erreurs des d.ts
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    
     "noEmit": true,
-    "baseUrl": ".",
-    
-    "paths": {
-      "@/*": ["src/*"]
-    },
-    
-    "types": ["node", "react", "react-dom"]           // ✅ Corrige TS2503
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "types": ["node", "react", "react-dom"]
   },
-  "include": ["src", "src/global.d.ts"],
-  "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src", "src/global.d.ts"]
 }
