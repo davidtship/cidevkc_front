@@ -2,7 +2,7 @@ import PageDashBreadcrumb from '@/components/Common/PageDashBreadcrumb'
 import { Col, Row, Button, Card, ProgressBar, Stack } from 'react-bootstrap'
 import { LatestLeads, LeadOverview, ProjectStatisticChart } from '@/components/Dashboards/CRM'
 import { useState, useEffect } from 'react'
-
+import { Link, useNavigate } from 'react-router-dom'
 // Define the shape of your API response
 interface CountData {
   formulaire?: number
@@ -12,9 +12,42 @@ interface CountData {
 
 const CRM: React.FC = () => {
   const [number, setNumber] = useState<CountData>({})
-
+  const navigate = useNavigate()
   useEffect(() => {
+
     async function fetchForm() {
+   function getCookie(cName: string) {
+        const name = cName + "=";
+        const cDecoded = decodeURIComponent(document.cookie); //to be careful
+        const cArr = cDecoded .split('; ');
+        let res;
+        cArr.forEach(val => {
+            if (val.indexOf(name) === 0) res = val.substring(name.length);
+        })
+        return res;
+      }
+      var access = getCookie("access");
+       if(access !=""){
+   const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/auth/users/me/`,{
+        'method':'GET',
+        'headers':{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+access
+        }
+      });
+      const resData = await res.json();
+      
+      if(resData.detail=="Given token not valid for any token type")
+      {
+        navigate('/login')
+      }
+      else{
+        navigate('/')
+      }
+    }
+    else{
+      navigate('/login')
+    }
       try {
         const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/get_count`, {
           method: 'GET',
