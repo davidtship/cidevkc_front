@@ -13,7 +13,7 @@ import {
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import Header from '../components/Header'
+
 
 const style1 = {
   marginBottom: '3%',

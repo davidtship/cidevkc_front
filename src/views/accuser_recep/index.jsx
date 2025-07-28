@@ -11,13 +11,14 @@ const Formulaire = () => {
   const navigate = useNavigate()
 
   // Get cookie value by name
-  function getCookie(name) {
-    const value = `; ${document.cookie}`
-    const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) return parts.pop().split(';').shift()
-    return ''
+ function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    return parts[1].split(';')[0];
   }
-
+  return undefined;
+}
   const token = getCookie('access')
 
   // Fetch data from API

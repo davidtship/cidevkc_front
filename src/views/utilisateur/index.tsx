@@ -11,7 +11,7 @@ const Formulaire = () => {
   const navigate = useNavigate()
 
   // Get cookie value by name
-  function getCookie(name) {
+  function getCookie(name: string) {
     const value = `; ${document.cookie}`
     const parts = value.split(`; ${name}=`)
     if (parts.length === 2) return parts.pop().split(';').shift()
@@ -84,7 +84,7 @@ const Formulaire = () => {
             <tbody>
               {data.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center text-muted">
+                 <td colSpan={6} className="text-center text-muted">
                     Aucun formulaire trouvé.
                   </td>
                 </tr>

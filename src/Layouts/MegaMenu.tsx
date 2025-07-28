@@ -1,9 +1,4 @@
-import {
-  MegaMenuApps,
-  MegaMenuAuth,
-  MegaMenuHome,
-  MegaMenuPages,
-} from '@/components/Topbar/MegaMenu'
+
 import { useState } from 'react'
 
 const MegaMenu = () => {

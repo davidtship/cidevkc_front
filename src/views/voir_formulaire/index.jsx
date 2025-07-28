@@ -1,6 +1,5 @@
-import { Button,Col,Dropdown, DropdownDivider, Card, Table, ProgressBar, Row, Stack, Pagination } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
-import { useNavigate,useParams  } from 'react-router-dom'
+
+import { useParams  } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 const style1 ={
 marginBottom:'3%'

@@ -14,9 +14,6 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
   const { settings, updateSettings } = useThemeContext()
   const [showLiveChat, setShowLiveChat] = useState(false)
 
-  const handleSupportLiveChat = () => {
-    setShowLiveChat(!showLiveChat)
-  }
 
   const handleCustomizer = () => {
     updateSettings({ customizer: ThemeSettings.customizer.show })

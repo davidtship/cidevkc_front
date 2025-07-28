@@ -19,9 +19,7 @@ const HorizontalLayout = ({ children }: HorizontaLayoutProps) => {
   const { settings, updateSettings } = useThemeContext()
   const [showLiveChat, setShowLiveChat] = useState(false)
 
-  const handleSupportLiveChat = () => {
-    setShowLiveChat(!showLiveChat)
-  }
+ 
 
   const handleCustomizer = () => {
     updateSettings({ customizer: ThemeSettings.customizer.show })

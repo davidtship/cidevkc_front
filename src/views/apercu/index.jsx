@@ -14,7 +14,7 @@ const Formulaire = () => {
   const [radioAnswers, setRadioAnswers] = useState({})
 
   useEffect(() => {
-    function getCookie(cname: string) {
+    function getCookie(cname) {
       let name = cname + '='
       let decodedCookie = decodeURIComponent(document.cookie)
       let ca = decodedCookie.split(';')
