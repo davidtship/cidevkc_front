@@ -2,8 +2,8 @@ import ThemeCustomizerPublic from '@/components/ThemeCustomizer/ThemeCustomizerP
 import { Button, Col, Offcanvas, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import SimpleBar from 'simplebar-react'
-import { ThemeSettings, useThemeContext } from './../../common/context'
-import useThemeCustomizer from './../../components/ThemeCustomizer/useThemeCustomizer'
+import { ThemeSettings, useThemeContext } from '../../common/context'
+import useThemeCustomizer from '../../components/ThemeCustomizer/useThemeCustomizer'
 
 const Customizer = () => {
   const { updateSettings, settings } = useThemeContext()
