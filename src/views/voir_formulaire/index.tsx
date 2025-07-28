@@ -1,6 +1,6 @@
 import PageDashBreadcrumb from '@/components/Common/PageDashBreadcrumb'
 import { Col, Row, Button, Card, ProgressBar, Stack } from 'react-bootstrap'
-import { LatestLeads, LeadOverview, ProjectStatisticChart } from '@/components/Dashboards/CRM'
+import { LatestLeads, LeadOverview, ProjectStatisticChart } from '../../components/Dashboards/CRM'
 import { useState, useEffect } from 'react'
 
 // Define the shape of your API response
