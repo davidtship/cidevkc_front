@@ -29,26 +29,8 @@ function getCookie(name) {
     var email = fd.get('nom')
     var motpasse = fd.get('nom')
 
-    if (fd.get('codech') != '' && fd.get('datec') != '') {
-      const formData = {
-        date_finale: fd.get('datef'),
-        mois_echeance: mois,
-      }
 
-      const res = await fetch(baseUrl + 'api/echeances/', {
-        method: 'POST',
-        body: JSON.stringify(formData),
-        headers: {
-          'Content-Type': 'application/json ',
-        },
-      })
-      const resData = await res.json()
-
-      if (resData.code_ech == formData.code_ech) alert('Cette echeance a ete creer avec success !!')
-      router.push('/echeances', { scroll: false })
-    } else {
-      alert('Veuillez remplir tout champs !!!')
-    }
+  
   }
   return (
     <>

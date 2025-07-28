@@ -1,5 +1,6 @@
 
-import { useParams  } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import { Col} from 'react-bootstrap'
 import { useState, useEffect } from 'react'
 const style1 ={
 marginBottom:'3%'
@@ -35,7 +36,7 @@ const Formulaire = () => {
     <div>
     
       <h4>{title}</h4>     
-          <Col  xl={18}>     
+          <Col xl={18}>     
            {categories.map(({questions,title}, index) => (
            <div>
            <p style={{fontSize:'1.3em'}}>Section {index+1} :{title}</p> 

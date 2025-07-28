@@ -82,7 +82,7 @@ const Formulaire = () => {
             <tbody>
               {data.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center text-muted">
+                  <td colSpan={6} className="text-center text-muted">
                     Aucun formulaire trouvé.
                   </td>
                 </tr>

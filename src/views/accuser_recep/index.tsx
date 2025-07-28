@@ -66,7 +66,7 @@ const Formulaire = () => {
   }
 
   return (
-    <>
+    <div>
       <h4 style={style1}>Information</h4>
 
       <Col xl={12}>
@@ -89,7 +89,7 @@ const Formulaire = () => {
           </div>
         </Card>
       </Col>
-    </>
+    </div>
   )
 }
 
