@@ -16,7 +16,7 @@ const CRM: React.FC = () => {
   useEffect(() => {
     async function fetchForm(): Promise<void> {
       try {
-        const res = await fetch(`http://localhost:8000/api/get_count`, {
+        const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/get_count`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

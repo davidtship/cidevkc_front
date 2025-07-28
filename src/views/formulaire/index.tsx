@@ -32,7 +32,7 @@ const Formulaire: React.FC = () => {
   useEffect(() => {
     async function fetchMyAPI(): Promise<void> {
       try {
-        const res = await fetch('http://localhost:8000/api/form', {
+        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/form', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

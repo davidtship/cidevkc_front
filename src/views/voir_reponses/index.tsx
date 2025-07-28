@@ -46,7 +46,7 @@ const Formulaire: React.FC = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch(`http://localhost:8000/api/returndataformuser/${id}`, {
+        const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

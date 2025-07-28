@@ -50,7 +50,7 @@ const Formulaire: React.FC = () => {
     setIsLoading(true);
     async function fetchData() {
       try {
-        const res = await fetch('http://localhost:8000/api/returndataformuser', {
+        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -69,14 +69,14 @@ const Formulaire: React.FC = () => {
 
   async function changeStatus(pk: number) {
     try {
-      await fetch(`http://localhost:8000/api/changestatus/${pk}`, {
+      await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/changestatus/${pk}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      const res = await fetch('http://localhost:8000/api/returndataformuser/', {
+      const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
