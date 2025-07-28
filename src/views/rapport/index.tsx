@@ -1,20 +1,43 @@
-import { Button, Col, Dropdown, DropdownDivider, Card, Table, Pagination } from 'react-bootstrap'
+import {
+  Button,
+  Col,
+  Dropdown,
+  DropdownDivider,
+  Card,
+  Table,
+  Pagination,
+} from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-const style1 = {
+// Define the structure of each data item
+interface FormUserData {
+  id: number
+  user: {
+    first_name: string
+    last_name: string
+  }
+  form: {
+    id: number
+    title: string
+  }
+  created_at: string
+  statut: boolean
+}
+
+const style1: React.CSSProperties = {
   marginBottom: '3%',
 }
 
-const Formulaire = () => {
-  const [data, setData] = useState([])
+const Formulaire: React.FC = () => {
+  const [data, setData] = useState<FormUserData[]>([])
   const navigate = useNavigate()
 
   // Get cookie value by name
-  function getCookie(name) {
+  function getCookie(name: string): string {
     const value = `; ${document.cookie}`
     const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) return parts.pop().split(';').shift()
+    if (parts.length === 2) return parts.pop()?.split(';').shift() || ''
     return ''
   }
 
@@ -22,7 +45,7 @@ const Formulaire = () => {
 
   // Fetch data from API
   useEffect(() => {
-    async function fetchData() {
+    async function fetchData(): Promise<void> {
       try {
         const res = await fetch('http://localhost:8000/api/returndataformuser', {
           method: 'GET',
@@ -31,7 +54,7 @@ const Formulaire = () => {
             Authorization: `Bearer ${token}`,
           },
         })
-        const resData = await res.json()
+        const resData: FormUserData[] = await res.json()
         setData(resData)
       } catch (err) {
         console.error('Failed to fetch data:', err)
@@ -42,7 +65,7 @@ const Formulaire = () => {
   }, [token])
 
   // Toggle published status
-  async function changeStatus(pk) {
+  async function changeStatus(pk: number): Promise<void> {
     try {
       await fetch(`http://localhost:8000/api/changestatus/${pk}`, {
         method: 'GET',
@@ -57,7 +80,7 @@ const Formulaire = () => {
           Authorization: `Bearer ${token}`,
         },
       })
-      const resData = await res.json()
+      const resData: FormUserData[] = await res.json()
       setData(resData)
     } catch (err) {
       console.error('Failed to change status:', err)
@@ -110,7 +133,6 @@ const Formulaire = () => {
                     <td>
                       {item.user.first_name} {item.user.last_name}
                     </td>
-
                     <td>{item.form.title}</td>
                     <td>{item.created_at}</td>
                     <td>
@@ -120,7 +142,6 @@ const Formulaire = () => {
                         </Button>
                       </Link>
                     </td>
-
                     <td>
                       {item.statut ? (
                         <Link to={`/apercu/${item.id}`}>

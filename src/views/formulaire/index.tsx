@@ -5,57 +5,78 @@ import {
   DropdownDivider,
   Card,
   Table,
-  ProgressBar,
-  Row,
-  Stack,
   Pagination,
 } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
+// Define the shape of each form item
+interface FormulaireData {
+  id: number
+  title: string
+  lien: string
+  created_at: string
+  statut: boolean
+  // You can add more fields like 'user' if needed
+}
 
-const style1 = {
+const style1: React.CSSProperties = {
   marginBottom: '3%',
 }
 
-const Formulaire = () => {
-  const [data, setdata] = useState([])
-  async function changestatus(pk) {
-    const res = await fetch('http://localhost:8000/api/changestatus/' + pk, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-    const resData = await res.json()
-    location.reload()
-  }
+const Formulaire: React.FC = () => {
+  const [data, setData] = useState<FormulaireData[]>([])
+  const navigate = useNavigate()
+
+  // Fetch all forms
   useEffect(() => {
-    async function fetchMyAPI() {
-      const res = await fetch('http://localhost:8000/api/form', {
+    async function fetchMyAPI(): Promise<void> {
+      try {
+        const res = await fetch('http://localhost:8000/api/form', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        const resData: FormulaireData[] = await res.json()
+        setData(resData)
+      } catch (err) {
+        console.error('Failed to fetch forms:', err)
+      }
+    }
+
+    fetchMyAPI()
+  }, [])
+
+  // Change publication status
+  async function changestatus(pk: number): Promise<void> {
+    try {
+      const res = await fetch(`http://localhost:8000/api/changestatus/${pk}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       })
-      const resData = await res.json()
-      setdata(resData)
+      await res.json()
+      location.reload()
+    } catch (err) {
+      console.error('Failed to change status:', err)
     }
-    fetchMyAPI()
-  }, [])
+  }
 
-  const navigate = useNavigate()
   return (
     <>
       <h4 style={style1}>Questionnaires</h4>
+
       <Button
         style={{ width: '10%', marginBottom: '2.5%' }}
         onClick={() => navigate('/ajouter_formulaire')}
-        variant="primary">
+        variant="primary"
+      >
         Ajouter
       </Button>
-      <Col xl={18}>
+
+      <Col xl={18 as any}>
         <Card>
           <Card.Header className="py-3 pe-3 d-flex justify-content-between align-items-center">
             <Card.Title>Questionnaire</Card.Title>
@@ -80,6 +101,7 @@ const Formulaire = () => {
               </Dropdown.Menu>
             </Dropdown>
           </Card.Header>
+
           <Table responsive className="mb-0">
             <thead>
               <tr className="border-b">
@@ -88,61 +110,58 @@ const Formulaire = () => {
                 <th>Action</th>
                 <th>Lien</th>
                 <th>Date</th>
-                <th scope="row">Utilisateurs</th>
+                <th>Utilisateurs</th>
               </tr>
             </thead>
             <tbody>
               {data.map(({ title, lien, id, created_at, statut }, index) => (
-                <tr key={index}>
+                <tr key={id}>
                   <td>{title}</td>
                   <td>
                     {statut ? (
-                      <span className={`badge bg-primary-subtle text-primary`}>Publié</span>
+                      <span className="badge bg-primary-subtle text-primary">Publié</span>
                     ) : (
-                      <span className={`badge bg-primary-subtle text-primary`}>Non publié</span>
+                      <span className="badge bg-primary-subtle text-primary">Non publié</span>
                     )}
                   </td>
                   <td>
-                    {statut ? (
-                      <Button
-                        onClick={() => changestatus(id)}
-                        style={{ marginRight: '10px' }}
-                        variant="secondary">
-                        <span className="">Retirer</span>
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={() => changestatus(id)}
-                        style={{ marginRight: '10px' }}
-                        variant="success">
-                        <span className="">Publier</span>
-                      </Button>
-                    )}
-                    <Link to={`/voir_formulaire/` + id}>
+                    <Button
+                      onClick={() => changestatus(id)}
+                      style={{ marginRight: '10px' }}
+                      variant={statut ? 'secondary' : 'success'}
+                    >
+                      <span>{statut ? 'Retirer' : 'Publier'}</span>
+                    </Button>
+
+                    <Link to={`/voir_formulaire/${id}`}>
                       <Button style={{ marginRight: '10px' }} variant="primary">
-                        <span className="">Voir</span>
+                        Voir
                       </Button>
                     </Link>
+
                     <Button style={{ marginRight: '10px' }} variant="secondary">
-                      <span className="">Modifier</span>
+                      Modifier
                     </Button>
+
                     <Button style={{ marginRight: '10px' }} variant="danger">
-                      <span className="">Supprimer</span>
+                      Supprimer
                     </Button>
                   </td>
+
                   <td>
                     {statut ? (
-                      <Link to={`/apercu/` + id}>
+                      <Link to={`/apercu/${id}`}>
                         <Button style={{ marginRight: '10px' }} variant="success">
-                          <span className="">Apercu</span>
+                          Aperçu
                         </Button>
                       </Link>
                     ) : (
                       <Button
-                        onClick={() => changestatus(id)}
+                        disabled
                         style={{ marginLeft: '-20px' }}
-                        variant="contained">
-                        <span className="">Non disponible</span>
+                        variant="secondary"
+                      >
+                        Non disponible
                       </Button>
                     )}
                   </td>
@@ -153,6 +172,7 @@ const Formulaire = () => {
               ))}
             </tbody>
           </Table>
+
           <Card.Footer className="border-top-0">
             <Pagination className="mb-0">
               <Pagination.Prev />

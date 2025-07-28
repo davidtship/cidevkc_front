@@ -1,38 +1,60 @@
 import { Form, Button, Col, Card } from 'react-bootstrap'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react'
 
-const Formulaire = () => {
-  const { id } = useParams()
+// Types
+interface Choice {
+  option: string
+}
+
+type QuestionType = 'short_answer' | 'checkboxes' | 'multiple_choice'
+
+interface Question {
+  id: number
+  label: string
+  question_type: QuestionType
+  choices: Choice[]
+}
+
+interface Category {
+  title: string
+  questions: Question[]
+}
+
+interface FormData {
+  title: string
+  categories: Category[]
+}
+
+// Component
+const Formulaire: React.FC = () => {
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [title, setTitle] = useState('')
-  const [categories, setCategories] = useState([])
-  const [token, settoken] = useState('')
 
-  const [shortAnswers, setShortAnswers] = useState({})
-  const [checkboxAnswers, setCheckboxAnswers] = useState({})
-  const [radioAnswers, setRadioAnswers] = useState({})
+  const [title, setTitle] = useState<string>('')
+  const [categories, setCategories] = useState<Category[]>([])
+  const [token, setToken] = useState<string>('')
 
+  const [shortAnswers, setShortAnswers] = useState<Record<number, string>>({})
+  const [checkboxAnswers, setCheckboxAnswers] = useState<Record<number, string[]>>({})
+  const [radioAnswers, setRadioAnswers] = useState<Record<number, string>>({})
+
+  // Get access token from cookie
   useEffect(() => {
-    function getCookie(cname) {
-      let name = cname + '='
-      let decodedCookie = decodeURIComponent(document.cookie)
-      let ca = decodedCookie.split(';')
-      for (let i = 0; i < ca.length; i++) {
-        let c = ca[i]
-        while (c.charAt(0) == ' ') {
-          c = c.substring(1)
-        }
-        if (c.indexOf(name) == 0) {
-          return c.substring(name.length, c.length)
+    function getCookie(cname: string): string {
+      const name = cname + '='
+      const decodedCookie = decodeURIComponent(document.cookie)
+      const ca = decodedCookie.split(';')
+      for (let c of ca) {
+        c = c.trim()
+        if (c.startsWith(name)) {
+          return c.substring(name.length)
         }
       }
       return ''
     }
 
-    settoken(getCookie('access'))
-
-    let cookies = document.cookie
+    setToken(getCookie('access'))
 
     async function fetchForm() {
       const res = await fetch(`http://localhost:8000/api/getFormbyid/${id}`, {
@@ -41,48 +63,48 @@ const Formulaire = () => {
           'Content-Type': 'application/json',
         },
       })
-      const resData = await res.json()
+      const resData: FormData = await res.json()
       setTitle(resData.title)
-      console.log(title)
       setCategories(resData.categories)
     }
+
     fetchForm()
   }, [id])
 
-  const handleShortAnswerChange = (questionId, value) => {
+  const handleShortAnswerChange = (questionId: number, value: string) => {
     setShortAnswers((prev) => ({ ...prev, [questionId]: value }))
   }
 
-  const handleCheckboxChange = (questionId, value, checked) => {
+  const handleCheckboxChange = (questionId: number, value: string, checked: boolean) => {
     setCheckboxAnswers((prev) => {
       const current = prev[questionId] || []
-      if (checked) {
-        return { ...prev, [questionId]: [...current, value] }
-      } else {
-        return {
-          ...prev,
-          [questionId]: current.filter((v) => v !== value),
-        }
+      return {
+        ...prev,
+        [questionId]: checked
+          ? [...current, value]
+          : current.filter((v) => v !== value),
       }
     })
   }
 
-  const handleRadioChange = (questionId, value) => {
+  const handleRadioChange = (questionId: number, value: string) => {
     setRadioAnswers((prev) => ({ ...prev, [questionId]: value }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
     const payload = {
       shortAnswers,
       checkboxAnswers,
       radioAnswers,
     }
 
-    var data = {
+    const data = {
       form: id,
     }
 
+    // Save form instance
     const res1 = await fetch('http://localhost:8000/api/save_form', {
       method: 'POST',
       headers: {
@@ -94,6 +116,7 @@ const Formulaire = () => {
 
     const resData1 = await res1.json()
 
+    // Save user responses
     const res2 = await fetch('http://localhost:8000/api/save_response', {
       method: 'POST',
       headers: {
@@ -105,68 +128,73 @@ const Formulaire = () => {
 
     const resData2 = await res2.json()
     console.log(resData2)
+
     navigate('/accuser_reception')
   }
 
   return (
-    <div style={{}}>
+    <div>
       <Form onSubmit={handleSubmit}>
         <h1>{title}</h1>
-        <Col xl={18}>
-          {categories.map(({ questions, title }, sectionIndex) => (
-            <Card style={{ width: '70%', marginBottom: '20px' }}>
+        <Col xl={18 as any}>
+          {categories.map((category, sectionIndex) => (
+            <Card key={sectionIndex} style={{ width: '70%', marginBottom: '20px' }}>
               <Card.Body>
-                <div key={sectionIndex}>
-                  <h2>
-                    Section {sectionIndex + 1}: {title}
-                  </h2>
-                  <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
-                    {questions.map(({ id, question_type, label, choices }) => (
-                      <li key={id}>
-                        <h4 style={{ fontSize: '1.5em' }}>{label}</h4>
+                <h2>
+                  Section {sectionIndex + 1}: {category.title}
+                </h2>
+                <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
+                  {category.questions.map((question) => (
+                    <li key={question.id}>
+                      <h4 style={{ fontSize: '1.5em' }}>{question.label}</h4>
 
-                        {question_type === 'short_answer' && (
-                          <Form.Control
-                            style={{
-                              fontSize: '1.3em',
-                              width: '200px',
-                              border: '0.1px black solid',
-                              marginBottom: '10px',
-                            }}
-                            type="text"
-                            onChange={(e) => handleShortAnswerChange(id, e.target.value)}
+                      {question.question_type === 'short_answer' && (
+                        <Form.Control
+                          style={{
+                            fontSize: '1.3em',
+                            width: '200px',
+                            border: '0.1px black solid',
+                            marginBottom: '10px',
+                          }}
+                          type="text"
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            handleShortAnswerChange(question.id, e.target.value)
+                          }
+                        />
+                      )}
+
+                      {question.question_type === 'checkboxes' &&
+                        question.choices.map((choice, i) => (
+                          <Form.Check
+                            style={{ fontSize: '1.3em' }}
+                            key={i}
+                            type="checkbox"
+                            label={choice.option}
+                            value={choice.option}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                              handleCheckboxChange(question.id, choice.option, e.target.checked)
+                            }
                           />
-                        )}
+                        ))}
 
-                        {question_type === 'checkboxes' &&
-                          choices.map(({ option }, i) => (
-                            <Form.Check
-                              style={{ fontSize: '1.3em' }}
-                              key={i}
-                              type="checkbox"
-                              label={option}
-                              value={option}
-                              onChange={(e) => handleCheckboxChange(id, option, e.target.checked)}
-                            />
-                          ))}
-
-                        {question_type === 'multiple_choice' &&
-                          choices.map(({ option }, i) => (
-                            <Form.Check
-                              style={{ fontSize: '1.3em' }}
-                              key={i}
-                              type="radio"
-                              name={`radio-${id}`} // important for grouping
-                              label={option}
-                              value={option}
-                              checked={radioAnswers[id] === option}
-                              onChange={(e) => handleRadioChange(id, e.target.value)}
-                            />
-                          ))}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                      {question.question_type === 'multiple_choice' &&
+                        question.choices.map((choice, i) => (
+                          <Form.Check
+                            style={{ fontSize: '1.3em' }}
+                            key={i}
+                            type="radio"
+                            name={`radio-${question.id}`}
+                            label={choice.option}
+                            value={choice.option}
+                            checked={radioAnswers[question.id] === choice.option}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                              handleRadioChange(question.id, e.target.value)
+                            }
+                          />
+                        ))}
+                    </li>
+                  ))}
+                </ul>
               </Card.Body>
             </Card>
           ))}
@@ -174,7 +202,8 @@ const Formulaire = () => {
           <Button
             type="submit"
             style={{ width: '10%', marginLeft: '2%', marginTop: '2.5%' }}
-            variant="primary">
+            variant="primary"
+          >
             Envoyer
           </Button>
         </Col>

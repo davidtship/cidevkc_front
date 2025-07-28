@@ -1,27 +1,40 @@
-import { Button, Col, Dropdown, DropdownDivider, Card, Table, Pagination } from 'react-bootstrap'
-import { Link, useNavigate } from 'react-router-dom'
+import { Button, Col, Card } from 'react-bootstrap'
+import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-const style1 = {
+const style1: React.CSSProperties = {
   marginBottom: '3%',
 }
 
-const Formulaire = () => {
-  const [data, setData] = useState([])
-  const navigate = useNavigate()
-
-  // Get cookie value by name
- function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
+// Utility: get cookie by name
+function getCookie(name: string): string | undefined {
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
   if (parts.length === 2) {
-    return parts[1].split(';')[0];
+    return parts[1].split(';')[0]
   }
-  return undefined;
+  return undefined
 }
+
+interface FormDataItem {
+  id: number
+  user: {
+    first_name: string
+    last_name: string
+  }
+  form: {
+    id: number
+    title: string
+  }
+  created_at: string
+  statut: boolean
+}
+
+const Formulaire: React.FC = () => {
+  const [data, setData] = useState<FormDataItem[]>([])
+  const navigate = useNavigate()
   const token = getCookie('access')
 
-  // Fetch data from API
   useEffect(() => {
     async function fetchData() {
       try {
@@ -39,11 +52,10 @@ const Formulaire = () => {
       }
     }
 
-    fetchData()
+    if (token) fetchData()
   }, [token])
 
-  // Toggle published status
-  async function changeStatus(pk) {
+  const changeStatus = async (pk: number) => {
     try {
       await fetch(`http://localhost:8000/api/changestatus/${pk}`, {
         method: 'GET',
@@ -52,7 +64,6 @@ const Formulaire = () => {
         },
       })
 
-      // Refresh data
       const res = await fetch('http://localhost:8000/api/returndataformuser/', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -73,7 +84,7 @@ const Formulaire = () => {
         <Card>
           <Card.Header className="d-flex justify-content-between align-items-center">
             <Card.Title>
-              <h3>Accuser de reception</h3>
+              <h3>Accusé de réception</h3>
             </Card.Title>
           </Card.Header>
           <div style={{ padding: '30px', textAlign: 'justify' }}>
@@ -81,10 +92,10 @@ const Formulaire = () => {
               Vos informations ont été bien enregistrées et seront intégrées à la base de données de
               la cartographie des interventions au Kasaï central. Si vous souhaitez transmettre des
               informations complémentaires ou corriger des informations, vous pouvez nous contacter
-              à l’adresse suivante : ou par téléphone +234 816 629 748.<br></br> Votre contribution
-              est précieuse pour améliorer la coordination et efficacité des interventions dans la
-              province. Merci encore pour votre temps et votre engagement. Merci d’avoir rempli le
-              formulaire.
+              à l’adresse suivante : ou par téléphone +234 816 629 748.<br />
+              Votre contribution est précieuse pour améliorer la coordination et efficacité des
+              interventions dans la province. Merci encore pour votre temps et votre engagement.
+              Merci d’avoir rempli le formulaire.
             </h5>
           </div>
         </Card>

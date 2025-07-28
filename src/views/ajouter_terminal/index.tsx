@@ -1,47 +1,56 @@
 import { Button, Col, Card, Form, Row } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
-const style1 = {
+// Optional: For consistent spacing
+const style1: React.CSSProperties = {
   marginBottom: '3%',
 }
 
-const Formulaire = () => {
-  const [data, setData] = useState([])
-  const navigate = useNavigate()
-
- function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
+// Utility to get cookie by name
+function getCookie(name: string): string | undefined {
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
   if (parts.length === 2) {
-    return parts[1].split(';')[0];
+    return parts[1].split(';')[0]
   }
-  return undefined;
+  return undefined
 }
 
+const Formulaire: React.FC = () => {
+  const [data, setData] = useState<any[]>([]) // Not used in this component, but typed
+  const navigate = useNavigate()
   const token = getCookie('access')
 
-  async function submitHandler(e) {
+  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const fd = new FormData(e.target)
-    var model = fd.get('model')
-    var adresse = fd.get('adresse')
+    const fd = new FormData(e.currentTarget)
+    const model = fd.get('model')?.toString().trim()
+    const adresse = fd.get('adresse')?.toString().trim()
 
-    if (fd.get('model') != '' && fd.get('adresse') != '') {
+    if (model && adresse) {
       const formData = {
-        model: model,
-        adresse: adresse,
+        model,
+        adresse,
       }
 
-      const res = await fetch('http://127.0.0.1:8000/api/terminal', {
-        method: 'POST',
-        body: JSON.stringify(formData),
-        headers: {
-          'Content-Type': 'application/json ',
-        },
-      })
-      const resData = await res.json()
-      location.reload()
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/terminal', {
+          method: 'POST',
+          body: JSON.stringify(formData),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        const resData = await res.json()
+        console.log(resData)
+        window.location.reload()
+      } catch (error) {
+        console.error('Error submitting form:', error)
+        alert('Erreur lors de l’envoi du formulaire.')
+      }
     } else {
       alert('Veuillez remplir tout champs !!!')
     }
@@ -49,32 +58,32 @@ const Formulaire = () => {
 
   return (
     <>
-      <h4 style={style1}>Ajout d'un terminal</h4>
+      <h4 style={style1}>Ajout d&apos;un terminal</h4>
 
       <Col xl={12} className="d-flex justify-content-center">
         <Card style={{ width: '60%', padding: '20px' }}>
           <Form onSubmit={submitHandler}>
-            {/* Nom */}
-            <Form.Group as={Row} className="mb-3" controlId="formNom">
+            {/* Model */}
+            <Form.Group as={Row} className="mb-3" controlId="formModel">
               <Form.Label column sm={3}>
                 Model
               </Form.Label>
               <Col sm={9}>
-                <Form.Control name="model" id="model" type="text" placeholder="Entrez le model" />
+                <Form.Control name="model" type="text" placeholder="Entrez le model" required />
               </Col>
             </Form.Group>
 
-            {/* Postnom */}
-            <Form.Group as={Row} className="mb-3" controlId="formPostnom">
+            {/* Adresse MAC */}
+            <Form.Group as={Row} className="mb-3" controlId="formAdresse">
               <Form.Label column sm={3}>
-                Adresse mac
+                Adresse MAC
               </Form.Label>
               <Col sm={9}>
                 <Form.Control
                   name="adresse"
-                  id="adresse"
                   type="text"
-                  placeholder="Entrez l'adresse de votre equipement"
+                  placeholder="Entrez l'adresse de votre équipement"
+                  required
                 />
               </Col>
             </Form.Group>

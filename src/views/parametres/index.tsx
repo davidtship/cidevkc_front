@@ -1,28 +1,43 @@
-import { Button, Col, Dropdown, DropdownDivider, Card, Table, Pagination } from 'react-bootstrap'
+import {
+  Button,
+  Col,
+  Dropdown,
+  DropdownDivider,
+  Card,
+  Table,
+  Pagination,
+} from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-const style1 = {
+// Type for a single terminal item
+interface TerminalData {
+  adresse: string
+  model: string
+  created_at: string
+  // You may add an `id: number` if you have one for delete/update/view logic
+}
+
+const style1: React.CSSProperties = {
   marginBottom: '3%',
 }
 
-const Formulaire = () => {
-  const [data, setData] = useState([])
+const Formulaire: React.FC = () => {
+  const [data, setData] = useState<TerminalData[]>([])
   const navigate = useNavigate()
 
   // Get cookie value by name
-  function getCookie(name) {
+  function getCookie(name: string): string {
     const value = `; ${document.cookie}`
     const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) return parts.pop().split(';').shift()
+    if (parts.length === 2) return parts.pop()?.split(';').shift() || ''
     return ''
   }
 
   const token = getCookie('access')
 
-  // Fetch data from API
   useEffect(() => {
-    async function fetchData() {
+    async function fetchData(): Promise<void> {
       try {
         const res = await fetch('http://localhost:8000/api/terminal', {
           method: 'GET',
@@ -31,7 +46,7 @@ const Formulaire = () => {
             Authorization: `Bearer ${token}`,
           },
         })
-        const resData = await res.json()
+        const resData: TerminalData[] = await res.json()
         setData(resData)
         console.log(JSON.stringify(resData))
       } catch (err) {
@@ -48,14 +63,15 @@ const Formulaire = () => {
       <Button
         style={{ width: '10%', marginBottom: '2.5%' }}
         onClick={() => navigate('/ajout_terminal')}
-        variant="primary">
+        variant="primary"
+      >
         Ajouter
       </Button>
+
       <Col xl={12}>
         <Card>
           <Card.Header className="d-flex justify-content-between align-items-center">
             <Card.Title>Liste des terminals</Card.Title>
-
             <Dropdown className="ms-auto">
               <Dropdown.Toggle variant="light" className="p-0 btn-icon btn-md arrow-none">
                 <i className="fi fi-bs-menu-dots-vertical"></i>
@@ -87,14 +103,12 @@ const Formulaire = () => {
                   </td>
                 </tr>
               ) : (
-                data.map(({ adresse, model, created_at }, index) => (
+                data.map((item, index) => (
                   <tr key={index}>
                     <td>{index + 1}</td>
-
-                    <td>{model}</td>
-                    <td>{adresse}</td>
-                    <td>{created_at}</td>
-
+                    <td>{item.model}</td>
+                    <td>{item.adresse}</td>
+                    <td>{item.created_at}</td>
                     <td>
                       <Link to={`/voir_reponses/1`}>
                         <Button className="me-2" variant="danger">

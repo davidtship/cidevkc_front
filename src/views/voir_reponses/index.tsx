@@ -1,10 +1,7 @@
-import { Button, Col, Card } from 'react-bootstrap';
+import {  Col, Card } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
-const style1: React.CSSProperties = {
-  marginBottom: '3%',
-};
 
 interface Form {
   title: string;
@@ -32,7 +29,7 @@ const Formulaire: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [form, setForm] = useState<Form | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const navigate = useNavigate();
+
 
   // Get cookie value by name
   function getCookie(name: string): string | undefined {

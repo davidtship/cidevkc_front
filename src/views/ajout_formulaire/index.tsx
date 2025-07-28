@@ -1,15 +1,28 @@
-import React, { useState } from 'react'
-import { Form, Col, Card, ProgressBar, Row, Stack } from 'react-bootstrap'
-import { Button } from '@mui/material'
+import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { Form, Card } from 'react-bootstrap';
+import { Button } from '@mui/material';
+
 const QUESTION_TYPES = {
   SHORT_ANSWER: 'short_answer',
   MULTIPLE_CHOICE: 'multiple_choice',
   CHECKBOXES: 'checkboxes',
+} as const;
+
+interface Question {
+  id: number;
+  label: string;
+  type: keyof typeof QUESTION_TYPES;
+  options?: string[];
 }
 
-const DynamicForm = () => {
-  const [questionnaire, setquestionnaire] = useState('')
-  const [sections, setSections] = useState([
+interface Section {
+  id: number;
+  title: string;
+  questions: Question[];
+}
+
+const DynamicForm: React.FC = () => {
+  const [sections, setSections] = useState<Section[]>([
     {
       id: Date.now(),
       title: 'Section 1',
@@ -17,12 +30,12 @@ const DynamicForm = () => {
         {
           id: Date.now() + 1,
           label: '',
-          type: QUESTION_TYPES.SHORT_ANSWER,
+          type: 'short_answer',
           options: [''],
         },
       ],
     },
-  ])
+  ]);
 
   const addSection = () => {
     setSections([
@@ -32,86 +45,96 @@ const DynamicForm = () => {
         title: `Section ${sections.length + 1}`,
         questions: [],
       },
-    ])
-  }
+    ]);
+  };
 
-  const removeSection = (sectionIndex) => {
-    const newSections = [...sections]
-    newSections.splice(sectionIndex, 1)
-    setSections(newSections)
-  }
+  const removeSection = (sectionIndex: number) => {
+    const newSections = [...sections];
+    newSections.splice(sectionIndex, 1);
+    setSections(newSections);
+  };
 
-  const handleSectionTitleChange = (index, value) => {
-    const newSections = [...sections]
-    newSections[index].title = value
-    setSections(newSections)
-  }
+  const handleSectionTitleChange = (index: number, value: string) => {
+    const newSections = [...sections];
+    newSections[index].title = value;
+    setSections(newSections);
+  };
 
-  const addQuestion = (sectionIndex) => {
-    const newSections = [...sections]
+  const addQuestion = (sectionIndex: number) => {
+    const newSections = [...sections];
     newSections[sectionIndex].questions.push({
       id: Date.now(),
       label: '',
-      type: QUESTION_TYPES.SHORT_ANSWER,
+      type: 'short_answer',
       options: [''],
-    })
-    setSections(newSections)
-  }
+    });
+    setSections(newSections);
+  };
 
-  const removeQuestion = (sectionIndex, questionIndex) => {
-    const newSections = [...sections]
-    newSections[sectionIndex].questions.splice(questionIndex, 1)
-    setSections(newSections)
-  }
+  const removeQuestion = (sectionIndex: number, questionIndex: number) => {
+    const newSections = [...sections];
+    newSections[sectionIndex].questions.splice(questionIndex, 1);
+    setSections(newSections);
+  };
 
-  const handleQuestionChange = (sectionIndex, questionIndex, field, value) => {
-    const newSections = [...sections]
-    const question = newSections[sectionIndex].questions[questionIndex]
-    question[field] = value
+  const handleQuestionChange = (
+    sectionIndex: number,
+    questionIndex: number,
+    field: keyof Question,
+    value: string
+  ) => {
+    const newSections = [...sections];
+    const question = newSections[sectionIndex].questions[questionIndex];
+    (question as any)[field] = value;
 
-    // Reset options if question type changes
     if (field === 'type') {
-      if (value === QUESTION_TYPES.MULTIPLE_CHOICE || value === QUESTION_TYPES.CHECKBOXES) {
-        question.options = ['']
+      if (value === 'multiple_choice' || value === 'checkboxes') {
+        question.options = [''];
       } else {
-        delete question.options
+        delete question.options;
       }
     }
 
-    setSections(newSections)
-  }
+    setSections(newSections);
+  };
 
-  const handleOptionChange = (sectionIndex, questionIndex, optionIndex, value) => {
-    const newSections = [...sections]
-    newSections[sectionIndex].questions[questionIndex].options[optionIndex] = value
-    setSections(newSections)
-  }
+  const handleOptionChange = (
+    sectionIndex: number,
+    questionIndex: number,
+    optionIndex: number,
+    value: string
+  ) => {
+    const newSections = [...sections];
+    newSections[sectionIndex].questions[questionIndex].options![optionIndex] = value;
+    setSections(newSections);
+  };
 
-  const addOption = (sectionIndex, questionIndex) => {
-    const newSections = [...sections]
-    newSections[sectionIndex].questions[questionIndex].options.push('')
-    setSections(newSections)
-  }
+  const addOption = (sectionIndex: number, questionIndex: number) => {
+    const newSections = [...sections];
+    newSections[sectionIndex].questions[questionIndex].options!.push('');
+    setSections(newSections);
+  };
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    const fd = new FormData(e.target)
-    var questionnaire = fd.get('quest')
-    var data = {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const questionnaire = fd.get('quest');
+
+    const data = {
       form: questionnaire,
       sections: sections,
-    }
+    };
 
-    const res = await fetch('http://localhost:8000/api/custcreatecategorie', {
+    await fetch('http://localhost:8000/api/custcreatecategorie', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {
-        'Content-Type': 'application/json ',
+        'Content-Type': 'application/json',
       },
-    })
-    const resData = await res.json()
-    console.log(JSON.stringify(data))
-    location.reload()
+    });
+
+    console.log(JSON.stringify(data));
+    location.reload();
   }
 
   return (
@@ -148,9 +171,7 @@ const DynamicForm = () => {
                 }}
               />
               {section.questions.map((question, questionIndex) => (
-                <div
-                  key={question.id}
-                  style={{ border: '1px solid #eee', padding: 10, marginBottom: 20 }}>
+                <div key={question.id} style={{ border: '1px solid #eee', padding: 10, marginBottom: 20 }}>
                   <Form.Control
                     type="text"
                     placeholder="Texte de la question"
@@ -172,11 +193,10 @@ const DynamicForm = () => {
                     <option value={QUESTION_TYPES.CHECKBOXES}>Cases à cocher</option>
                   </Form.Select>
 
-                  {question.type === QUESTION_TYPES.MULTIPLE_CHOICE ||
-                  question.type === QUESTION_TYPES.CHECKBOXES ? (
+                  {(question.type === 'multiple_choice' || question.type === 'checkboxes') && (
                     <div>
                       <strong>Options :</strong>
-                      {question.options.map((option, optionIndex) => (
+                      {question.options?.map((option, optionIndex) => (
                         <div key={optionIndex} style={{ marginBottom: 5 }}>
                           <Form.Control
                             type="text"
@@ -187,7 +207,7 @@ const DynamicForm = () => {
                                 sectionIndex,
                                 questionIndex,
                                 optionIndex,
-                                e.target.value,
+                                e.target.value
                               )
                             }
                             style={{ marginTop: '1%', width: '50%', border: '0.5px solid black' }}
@@ -201,7 +221,7 @@ const DynamicForm = () => {
                         ➕ Ajouter une option
                       </Button>
                     </div>
-                  ) : null}
+                  )}
 
                   <div style={{ marginTop: 10 }}>
                     <Button
@@ -238,7 +258,7 @@ const DynamicForm = () => {
         ✅ Soumettre le formulaire
       </Button>
     </form>
-  )
-}
+  );
+};
 
-export default DynamicForm
+export default DynamicForm;
