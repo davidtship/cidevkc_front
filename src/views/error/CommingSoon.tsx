@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Button, Form, Stack } from 'react-bootstrap'
 import { toast } from 'react-hot-toast'
 import ErrorLayout from './ErrorLayout'
-import CountdownTimer from './Countdown/countdownTimer'
 import TitleHelmet from '@/components/Common/TitleHelmet'
 
 const socialMediaIcons = [
@@ -43,7 +42,6 @@ const ComingSoon = () => {
       <TitleHelmet title="Comming Soon" />
       <ErrorLayout>
         <div className="mb-16 mb-md-24">
-          <CountdownTimer />
         </div>
         <div className="my-8">
           <h3 className="fw-bold mb-3">We're launching soon</h3>

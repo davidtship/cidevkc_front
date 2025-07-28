@@ -8,17 +8,17 @@ import PrivateRoute from './PrivateRoute'
 const Ecommerce = React.lazy(() => import('./../views/dashboards'))
 const Analytics = React.lazy(() => import('./../views/dashboards/Analytics'))
 const CRM = React.lazy(() => import('./../views/dashboards/CRM'))
-const Formulaire = React.lazy(() => import('./../views/formulaire'))
-const Reponses = React.lazy(() => import('./../views/reponses'))
+const Formulaire = React.lazy(() => import('../views/formulaire'))
+const Reponses = React.lazy(() => import('../views/reponses'))
 const Utilisateurs = React.lazy(() => import('./../views/utilisateur'))
-const Parametres = React.lazy(() => import('./../views/parametres'))
-const Ajout_form = React.lazy(() => import('./../views/ajout_formulaire'))
-const Voir_form = React.lazy(() => import('./../views/voir_formulaire'))
-const Apercu_form = React.lazy(() => import('./../views/apercu'))
-const Voir_rep = React.lazy(() => import('./../views/voir_reponses'))
-const Ajout_user = React.lazy(() => import('./../views/ajout_user'))
-const Ajout_terminal = React.lazy(() => import('./../views/ajouter_terminal'))
-const Accuser_reception = React.lazy(() => import('./../views/accuser_recep'))
+const Parametres = React.lazy(() => import('../views/parametres'))
+const Ajout_form = React.lazy(() => import('../views/ajout_formulaire'))
+const Voir_form = React.lazy(() => import('../views/voir_formulaire'))
+const Apercu_form = React.lazy(() => import('../views/apercu'))
+const Voir_rep = React.lazy(() => import('../views/voir_reponses'))
+const Ajout_user = React.lazy(() => import('../views/ajout_user'))
+const Ajout_terminal = React.lazy(() => import('../views/ajouter_terminal'))
+const Accuser_reception = React.lazy(() => import('../views/accuser_recep'))
 
 // Apps
 const Chat = React.lazy(() => import('./../views/apps/Chat'))
@@ -65,7 +65,6 @@ const AdvRadio = React.lazy(() => import('./../views/uielements/forms/AdvRadio')
 const AdvCheckbox = React.lazy(() => import('./../views/uielements/forms/AdvCheckbox'))
 const AdvSwitch = React.lazy(() => import('./../views/uielements/forms/AdvSwitch'))
 const Elements = React.lazy(() => import('./../views/uielements/forms/Elements'))
-const Validation = React.lazy(() => import('./../views/uielements/forms/Validation'))
 const InputMask = React.lazy(() => import('./../views/uielements/forms/InputMask'))
 const NoUiSlider = React.lazy(() => import('./../views/uielements/forms/NoUiSlider'))
 
@@ -551,12 +550,6 @@ const componentsRoutes: RoutesProps = {
           path: '/components/forms/elements',
           name: 'Elements',
           element: <Elements />,
-          route: PrivateRoute,
-        },
-        {
-          path: '/components/forms/validation',
-          name: 'Validation',
-          element: <Validation />,
           route: PrivateRoute,
         },
         {

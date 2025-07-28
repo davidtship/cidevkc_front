@@ -11,7 +11,7 @@ const Formulaire = () => {
   const navigate = useNavigate()
 
   // Get cookie value by name
-  function getCookie(name: string) {
+  function getCookie(name) {
     const value = `; ${document.cookie}`
     const parts = value.split(`; ${name}=`)
     if (parts.length === 2) return parts.pop().split(';').shift()

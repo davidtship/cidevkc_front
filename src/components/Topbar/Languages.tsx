@@ -21,13 +21,7 @@ const Languages = () => {
           role="button"
           onClick={toggleDropDown}
         >
-          <img
-            src={lang.flag}
-            alt="flag"
-            width={20}
-            height={20}
-            className="img-fluid rounded-circle"
-          />
+         
         </Dropdown.Toggle>
         <Dropdown.Menu align="end">
           {langData.map(({ flag, name }, idx) => (
