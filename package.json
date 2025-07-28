@@ -4,7 +4,6 @@
   "homepage": "https://davidtship.github.io/cidevkc_front/",
   "version": "1.2.0",
   "author": "WRAPCODERS",
-  "main": "prettier.config.js",
   "type": "module",
   "license": "ISC",
   "keywords": [
