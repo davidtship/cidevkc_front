@@ -23,6 +23,7 @@
   ],
   "scripts": {
     "dev": "vite --host",
+    "start": "vite preview --host",
     "build": "tsc && vite build --base=/",
     "lint": "eslint --fix . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
