@@ -1,6 +1,6 @@
 import { Card, Row, Col } from 'react-bootstrap'
 import Saving from '@/components/Misc/Saving.tsx'
-import { AccountAvatarCover, AccountInformation, AccountPreferences } from './Components.tsx'
+import { AccountAvatarCover, AccountInformation, AccountPreferences } from './Components.tsx/index.tsx'
 
 const AccountComponent = () => {
   return (
