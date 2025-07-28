@@ -5,7 +5,7 @@ import AuthLayout from '@/Layouts/AuthLayout'
 import TitleHelmet from '@/components/Common/TitleHelmet'
 import { Button, Form, Stack } from 'react-bootstrap'
 import AuthMinmal from './AuthMinmal'
-import Alert from '@mui/material/Alert'
+
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false)
