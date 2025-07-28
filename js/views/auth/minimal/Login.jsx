@@ -19,7 +19,7 @@ const Login = () => {
                 email: fd.get('username'),
                 password: fd.get('password'),
             };
-            const res = await fetch('http://localhost:8000/auth/jwt/create/', {
+            const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/auth/jwt/create/', {
                 method: 'POST',
                 body: JSON.stringify(formData),
                 headers: {

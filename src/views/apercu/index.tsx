@@ -57,7 +57,7 @@ const Formulaire: React.FC = () => {
     setToken(getCookie('access'))
 
     async function fetchForm() {
-      const res = await fetch(`http://localhost:8000/api/getFormbyid/${id}`, {
+      const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/getFormbyid/${id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ const Formulaire: React.FC = () => {
     }
 
     // Save form instance
-    const res1 = await fetch('http://localhost:8000/api/save_form', {
+    const res1 = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/save_form', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ const Formulaire: React.FC = () => {
     const resData1 = await res1.json()
 
     // Save user responses
-    const res2 = await fetch('http://localhost:8000/api/save_response', {
+    const res2 = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/save_response', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

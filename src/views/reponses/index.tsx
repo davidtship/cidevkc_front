@@ -67,7 +67,7 @@ const Formulaire: React.FC = () => {
   // Toggle published status
   async function changeStatus(pk: number): Promise<void> {
     try {
-      await fetch(`http://localhost:8000/api/changestatus/${pk}`, {
+      await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/changestatus/${pk}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ const Formulaire: React.FC = () => {
       })
 
       // Refresh data
-      const res = await fetch('http://localhost:8000/api/returndataformuser/', {
+      const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

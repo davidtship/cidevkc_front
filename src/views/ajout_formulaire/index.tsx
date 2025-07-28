@@ -126,7 +126,7 @@ const DynamicForm: React.FC = () => {
       sections: sections,
     };
 
-    await fetch('http://localhost:8000/api/custcreatecategorie', {
+    await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/custcreatecategorie', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {

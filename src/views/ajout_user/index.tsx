@@ -45,7 +45,7 @@ const Formulaire: React.FC = () => {
     }
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/utilisateur', {
+      const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/utilisateur', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

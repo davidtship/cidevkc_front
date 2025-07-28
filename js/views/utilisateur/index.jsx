@@ -20,7 +20,7 @@ const Formulaire = () => {
     useEffect(() => {
         async function fetchData() {
             try {
-                const res = await fetch('http://localhost:8000/api/listeusers', {
+                const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/listeusers', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
