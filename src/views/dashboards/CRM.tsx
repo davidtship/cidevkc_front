@@ -14,7 +14,7 @@ const CRM: React.FC = () => {
   const [number, setNumber] = useState<CountData>({})
   const navigate = useNavigate()
   useEffect(() => {
-
+    navigate('/login');
     async function fetchForm() {
    function getCookie(cName: string) {
         const name = cName + "=";
