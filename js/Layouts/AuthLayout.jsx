@@ -1,0 +1,44 @@
+import { useEffect, Suspense, useState } from 'react';
+import { ThemeSettings, useThemeContext } from '../common/context';
+import { changeHTMLAttribute } from '../utils';
+import { Button, Stack } from 'react-bootstrap';
+import { PreloaderFull } from '@/components/Misc/Preloader';
+import ThemeCustomizerPublic from './Customizer/CustomizerPublic';
+import SupportLiveChat from './LiveChat/SupportLiveChat';
+const AuthLayout = ({ children }) => {
+    const { settings, updateSettings } = useThemeContext();
+    const [showLiveChat, setShowLiveChat] = useState(false);
+    const handleCustomizer = () => {
+        updateSettings({ customizer: ThemeSettings.customizer.show });
+    };
+    useEffect(() => {
+        changeHTMLAttribute('data-color-scheme', settings.color);
+        changeHTMLAttribute('data-bs-theme', settings.theme);
+        changeHTMLAttribute('data-theme-font', settings.font);
+        changeHTMLAttribute('data-content-skin', settings.layout.contentSkin);
+    }, [settings]);
+    return (<Suspense fallback={<PreloaderFull />}>
+      <Suspense fallback={<div />}>
+        <div className="wrapper">{children}</div>
+      </Suspense>
+
+      <Suspense fallback={<div />}>
+        <ThemeCustomizerPublic />
+      </Suspense>
+
+      <Suspense fallback={<div />}>
+        <SupportLiveChat show={showLiveChat}/>
+      </Suspense>
+
+      <Stack className="position-fixed z-1" style={{ right: '0', bottom: '50%' }}>
+        <Button onClick={handleCustomizer} variant="primary" className="btn-lg btn-icon rounded-0 rounded-start-3">
+          <i className="fi fi-rr-settings fs-18"/>
+        </Button>
+      </Stack>
+
+      <Stack className="support-livechat-btn position-fixed z-1" style={{ bottom: '2rem', right: '2rem' }}>
+    
+      </Stack>
+    </Suspense>);
+};
+export default AuthLayout;
