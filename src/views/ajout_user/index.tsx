@@ -21,7 +21,8 @@ const Formulaire: React.FC = () => {
   const navigate = useNavigate()
   const token = getCookie('access')
 
-  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     const fd = new FormData(e.currentTarget)
 
 const nom = fd.get('nom')
@@ -38,7 +39,7 @@ if (!nom || !postnom || !emailRaw || !motdepasseRaw || !type_userRaw) {
 const first_name = nom.toString().trim()
 const last_name = postnom.toString().trim()
 const email = emailRaw.toString().trim()
-const motdepasse = motdepasseRaw.toString().trim()
+const password = motdepasseRaw.toString().trim()
 const type_user = type_userRaw.toString().trim()
 
 const username = first_name + last_name
@@ -47,13 +48,13 @@ const username = first_name + last_name
       first_name,
       last_name,
       email,
-      motdepasse,
+      password,
       type_user,
       username
     }
 
     try {
-      const res  =  await fetch('https://cidevkc-09c92764069d.herokuapp.com/auth/users/', {
+      const res  =  await fetch('http://127.0.0.1:8000/auth/users/', {
         method: 'POST',
         body: JSON.stringify(formData),
         headers: {
@@ -77,7 +78,7 @@ const username = first_name + last_name
 
       <Col xl={12} className="d-flex justify-content-center">
         <Card style={{ width: '60%', padding: '20px' }}>
-          <Form onSubmit={submitHandler}>
+          <Form onSubmit={handleSubmit}>
             <Form.Group as={Row} className="mb-3" controlId="formNom">
               <Form.Label column sm={3}>Nom:</Form.Label>
               <Col sm={9}>
