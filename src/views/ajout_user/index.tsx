@@ -28,38 +28,39 @@ const Formulaire: React.FC = () => {
     const postnom = fd.get('postnom')?.toString().trim()
     const email = fd.get('email')?.toString().trim()
     const motdepasse = fd.get('motdepass')?.toString().trim()
-    const image = fd.get('image') as File
 
     if (!nom || !postnom || !email || !motdepasse) {
       alert('Veuillez remplir tous les champs requis.')
       return
     }
 
+
     const formData = new FormData()
     formData.append('nom', nom)
     formData.append('postnom', postnom)
     formData.append('email', email)
     formData.append('motdepasse', motdepasse)
-    if (image) {
-      formData.append('image', image)
-    }
 
     try {
-      const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/utilisateur', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      })
+        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/auth/users', {
+          method: 'POST',
+          body: JSON.stringify(formData),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
 
-      const resData = await res.json()
-      console.log('User added:', resData)
-      navigate('/liste_utilisateurs')
-    } catch (error) {
-      console.error('Erreur lors de la soumission du formulaire:', error)
-      alert("Une erreur s'est produite lors de l'ajout.")
-    }
+        const resData = await res.json()
+        console.log(resData)
+        window.location.reload()
+      } catch (error) {
+        console.error('Error submitting form:', error)
+        alert('Erreur lors de l’envoi du formulaire.')
+      }
+    
+
+ 
   }
 
   return (
@@ -97,12 +98,6 @@ const Formulaire: React.FC = () => {
               </Col>
             </Form.Group>
 
-            <Form.Group as={Row} className="mb-4" controlId="formFile">
-              <Form.Label column sm={3}>Fichier:</Form.Label>
-              <Col sm={9}>
-                <Form.Control name="image" type="file" />
-              </Col>
-            </Form.Group>
 
             <div className="d-flex justify-content-end">
               <Button type="submit" variant="primary" style={{ width: '200px', height: '38px' }}>

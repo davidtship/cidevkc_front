@@ -35,7 +35,7 @@ const Formulaire: React.FC = () => {
       }
 
       try {
-        const res = await fetch('http://127.0.0.1:/api/terminal', {
+        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/terminal', {
           method: 'POST',
           body: JSON.stringify(formData),
           headers: {
