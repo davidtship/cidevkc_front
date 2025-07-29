@@ -22,45 +22,53 @@ const Formulaire: React.FC = () => {
   const token = getCookie('access')
 
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
     const fd = new FormData(e.currentTarget)
-    const nom = fd.get('nom')?.toString().trim()
-    const postnom = fd.get('postnom')?.toString().trim()
-    const email = fd.get('email')?.toString().trim()
-    const motdepasse = fd.get('motdepass')?.toString().trim()
 
-    if (!nom || !postnom || !email || !motdepasse) {
-      alert('Veuillez remplir tous les champs requis.')
-      return
+const nom = fd.get('nom')
+const postnom = fd.get('postnom')
+const emailRaw = fd.get('email')
+const motdepasseRaw = fd.get('motdepass')
+const type_userRaw = fd.get('type_user')
+
+if (!nom || !postnom || !emailRaw || !motdepasseRaw || !type_userRaw) {
+  alert('Veuillez remplir tous les champs.')
+  return
+}
+
+const first_name = nom.toString().trim()
+const last_name = postnom.toString().trim()
+const email = emailRaw.toString().trim()
+const motdepasse = motdepasseRaw.toString().trim()
+const type_user = type_userRaw.toString().trim()
+
+const username = first_name + last_name
+
+    const formData = {
+      first_name,
+      last_name,
+      email,
+      motdepasse,
+      type_user,
+      username
     }
 
-
-    const formData = new FormData()
-    formData.append('nom', nom)
-    formData.append('postnom', postnom)
-    formData.append('email', email)
-    formData.append('motdepasse', motdepasse)
-
     try {
-        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/auth/users', {
-          method: 'POST',
-          body: JSON.stringify(formData),
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        })
+      const res  =  await fetch('https://cidevkc-09c92764069d.herokuapp.com/auth/users/', {
+        method: 'POST',
+        body: JSON.stringify(formData),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      })
 
-        const resData = await res.json()
-        console.log(resData)
-        window.location.reload()
-      } catch (error) {
-        console.error('Error submitting form:', error)
-        alert('Erreur lors de l’envoi du formulaire.')
-      }
-    
-
- 
+      const resData = await res.json()
+      console.log(resData)
+      window.location.reload()
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      alert('Erreur lors de l’envoi du formulaire.')
+    }
   }
 
   return (
@@ -98,6 +106,17 @@ const Formulaire: React.FC = () => {
               </Col>
             </Form.Group>
 
+            <Form.Group as={Row} className="mb-3" controlId="formTypeUser">
+              <Form.Label column sm={3}>Type d'utilisateur:</Form.Label>
+              <Col sm={9}>
+                <Form.Select name="type_user" required>
+                  <option value="">-- Sélectionnez un type --</option>
+                  <option value="admin">Admin</option>
+                  <option value="simple">Simple</option>
+                  <option value="super_admin">Super_admin</option>
+                </Form.Select>
+              </Col>
+            </Form.Group>
 
             <div className="d-flex justify-content-end">
               <Button type="submit" variant="primary" style={{ width: '200px', height: '38px' }}>
