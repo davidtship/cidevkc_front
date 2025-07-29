@@ -7,6 +7,7 @@ import NotificationOffcanvas from './Notifications/NotificationOffcanvas'
 import profilePic from '@/assets/images/avatars/1.png'
 import Avatar from './../UiElements/Base/Avatars/Avatar'
 import Status from '../Misc/Status'
+import userAvatar from "../../assets/images/avatars/user-avatar.png"
 
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -31,6 +32,7 @@ const Profile = () => {
       }
       return ''
     }
+    const token = getCookie('access')
 
     setpath(getCookie('profilpicpath'))
     setfirstname(getCookie('firstname'))
@@ -80,7 +82,7 @@ const Profile = () => {
           as="a"
           role="button"
           onClick={toggleDropDown}>
-          <Avatar type="image" src={path} size="md">
+          <Avatar type="image" src={userAvatar} size="md">
             <div
               className={`avatar-status bg-${
                 statusOptions.find((opt) => opt.label === status)?.color
@@ -89,7 +91,7 @@ const Profile = () => {
         </Dropdown.Toggle>
         <Dropdown.Menu align="end" className="dropdown-md px-0 py-0">
           <div className="px-4 py-3 d-flex border-bottom">
-            <Avatar type="image" src={path} size="md" shape="2" className="flex-shrink-0" />
+            <Avatar type="image" src={userAvatar} size="md" shape="2" className="flex-shrink-0" />
             <div className="flex-grow-1 ms-3">
               <h6 className="text-dark mb-0">
                 {firstname}

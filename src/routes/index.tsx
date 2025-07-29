@@ -20,7 +20,19 @@ const Ajout_user = React.lazy(() => import('../views/ajout_user'))
 const Ajout_terminal = React.lazy(() => import('../views/ajouter_terminal'))
 const Accuser_reception = React.lazy(() => import('../views/accuser_recep'))
 
+
+
+
+
+
 // Apps
+
+
+
+
+
+
+
 const Chat = React.lazy(() => import('../views/apps/Chat'))
 const Email = React.lazy(() => import('../views/apps/Email'))
 const Invoice = React.lazy(() => import('../views/apps/Invoice'))

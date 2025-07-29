@@ -14,24 +14,48 @@ const CRM: React.FC = () => {
   const [number, setNumber] = useState<CountData>({})
   const navigate = useNavigate()
   useEffect(() => {
-    async function fetchForm() {
-  
-      try {
-        const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/get_count`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        const resData: CountData = await res.json()
-        console.log(resData)
-        setNumber(resData)
-      } catch (error) {
-        console.error('Error fetching data:', error)
+     function getCookie(cname: string) {
+      let name = cname + '='
+      let decodedCookie = decodeURIComponent(document.cookie)
+      let ca = decodedCookie.split(';')
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i]
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1)
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length)
+        }
       }
-    }
+      return ''
+     }
+  const token = getCookie('access')
+    if (token != "") {
+  
 
-    fetchForm()
+
+
+      async function fetchForm() {
+  
+        try {
+          const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/get_count`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+          const resData: CountData = await res.json()
+          console.log(resData)
+          setNumber(resData)
+        } catch (error) {
+          console.error('Error fetching data:', error)
+        }
+      }
+      fetchForm()
+    }
+    else {
+      navigate("/login");
+    }
   }, [])
 
   return (

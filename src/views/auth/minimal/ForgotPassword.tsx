@@ -68,8 +68,8 @@ const ForgotPassword = () => {
               </Button>
             </div>
             <div>
-              <Link to="/auth/minimal/login" className="link-primary">
-                Return to login
+              <Link to="/login" className="link-primary">
+                Se connecter
               </Link>
             </div>
           </Form>

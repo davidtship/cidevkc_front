@@ -14,6 +14,14 @@ const Login: React.FC = () => {
   const [emailError, setEmailError] = useState<string | null>(null)
   const navigate = useNavigate()
 
+   useEffect(() => {
+   document.cookie = "access"+"="+";"+" path=/";
+     document.cookie = "profilpicpath"+"="+";"+" path=/";
+     document.cookie = "firstname"+"="+";"+" path=/";
+    document.cookie = "lastname" + "=" + ";" + " path=/";
+  }, [])
+
+
   async function submitHandler(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
@@ -93,7 +101,7 @@ const Login: React.FC = () => {
                 type="password"
                 name="password"
                 id="password"
-                placeholder="Password"
+                placeholder="Mot de passe"
                 required
               />
             </Form.Group>
