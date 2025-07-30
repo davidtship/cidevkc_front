@@ -103,7 +103,7 @@ const Login: React.FC = () => {
       const isSuperAdmin = userData?.type_user === 'super_admin'
 
       // Étape 2.2 : Refuser si appareil non autorisé et pas super admin
-      if (!deviceData.allowed && !isSuperAdmin) {
+      if (!deviceData.allowed || !isSuperAdmin) {
         setVariant('danger')
         setMessage("Appareil non autorisé. Contactez votre administrateur.")
         return
