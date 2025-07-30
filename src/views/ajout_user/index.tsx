@@ -54,7 +54,7 @@ const username = first_name + last_name
     }
 
     try {
-      const res  =  await fetch('http://127.0.0.1:8000/auth/users/', {
+      const res  =  await fetch('https://cidevkc-09c92764069d.herokuapp.com/auth/users/', {
         method: 'POST',
         body: JSON.stringify(formData),
         headers: {

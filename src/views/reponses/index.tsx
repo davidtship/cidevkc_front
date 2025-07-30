@@ -6,11 +6,11 @@ import {
   Card,
   Table,
   Pagination,
+  Spinner,
 } from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-// Define the type of each item in the response
 interface FormData {
   id: number
   user: {
@@ -31,9 +31,8 @@ const style1: React.CSSProperties = {
 
 const Formulaire: React.FC = () => {
   const [data, setData] = useState<FormData[]>([])
- 
+  const [loading, setLoading] = useState<boolean>(true)
 
-  // Get cookie value by name
   function getCookie(name: string): string {
     const value = `; ${document.cookie}`
     const parts = value.split(`; ${name}=`)
@@ -43,7 +42,6 @@ const Formulaire: React.FC = () => {
 
   const token = getCookie('access')
 
-  // Fetch data from API
   useEffect(() => {
     async function fetchData(): Promise<void> {
       try {
@@ -58,13 +56,14 @@ const Formulaire: React.FC = () => {
         setData(resData)
       } catch (err) {
         console.error('Failed to fetch data:', err)
+      } finally {
+        setLoading(false)
       }
     }
 
     fetchData()
   }, [token])
 
-  // Toggle published status
   async function changeStatus(pk: number): Promise<void> {
     try {
       await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/changestatus/${pk}`, {
@@ -74,7 +73,6 @@ const Formulaire: React.FC = () => {
         },
       })
 
-      // Refresh data
       const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser/', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -108,66 +106,77 @@ const Formulaire: React.FC = () => {
             </Dropdown>
           </Card.Header>
 
-          <Table responsive bordered hover className="mb-0">
-            <thead className="table-light">
-              <tr>
-                <th>#</th>
-                <th>Utilisateur</th>
-                <th>Questionnaire</th>
-                <th>Date de soumission</th>
-                <th>Voir les réponses</th>
-                <th>Date de création</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center text-muted">
-                    Aucun formulaire trouvé.
-                  </td>
-                </tr>
-              ) : (
-                data.map((item, index) => (
-                  <tr key={item.id}>
-                    <td>{index + 1}</td>
-                    <td>
-                      {item.user.first_name} {item.user.last_name}
-                    </td>
-                    <td>{item.form.title}</td>
-                    <td>{item.created_at}</td>
-                    <td>
-                      <Link to={`/voir_reponses/${item.form.id}`}>
-                        <Button className="me-2" variant="success">
-                          Voir
-                        </Button>
-                      </Link>
-                    </td>
-                    <td>
-                      {item.statut ? (
-                        <Link to={`/apercu/${item.id}`}>
-                          <Button variant="success">Aperçu</Button>
-                        </Link>
-                      ) : (
-                        <Button disabled variant="secondary">
-                          Non disponible
-                        </Button>
-                      )}
-                    </td>
+          {loading ? (
+            <div className="text-center my-5">
+                <Spinner animation="border" role="status" variant="primary">
+                  <span className="visually-hidden">Chargement...</span>
+                </Spinner>
+                <div className="mt-2 text-muted">Chargement des reponses...</div>
+              </div>
+          ) : (
+            <>
+              <Table responsive bordered hover className="mb-0">
+                <thead className="table-light">
+                  <tr>
+                    <th>#</th>
+                    <th>Utilisateur</th>
+                    <th>Questionnaire</th>
+                    <th>Date de soumission</th>
+                    <th>Voir les réponses</th>
+                    <th>Date de création</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </Table>
+                </thead>
+                <tbody>
+                  {data.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center text-muted">
+                        Aucun formulaire trouvé.
+                      </td>
+                    </tr>
+                  ) : (
+                    data.map((item, index) => (
+                      <tr key={item.id}>
+                        <td>{index + 1}</td>
+                        <td>
+                          {item.user.first_name} {item.user.last_name}
+                        </td>
+                        <td>{item.form.title}</td>
+                        <td>{item.created_at}</td>
+                        <td>
+                          <Link to={`/voir_reponses/${item.form.id}`}>
+                            <Button className="me-2" variant="success">
+                              Voir
+                            </Button>
+                          </Link>
+                        </td>
+                        <td>
+                          {item.statut ? (
+                            <Link to={`/apercu/${item.id}`}>
+                              <Button variant="success">Aperçu</Button>
+                            </Link>
+                          ) : (
+                            <Button disabled variant="secondary">
+                              Non disponible
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </Table>
 
-          <Card.Footer className="border-top-0">
-            <Pagination className="mb-0">
-              <Pagination.Prev />
-              {[...Array(4)].map((_, index) => (
-                <Pagination.Item key={index}>{index + 1}</Pagination.Item>
-              ))}
-              <Pagination.Next />
-            </Pagination>
-          </Card.Footer>
+              <Card.Footer className="border-top-0">
+                <Pagination className="mb-0">
+                  <Pagination.Prev />
+                  {[...Array(4)].map((_, index) => (
+                    <Pagination.Item key={index}>{index + 1}</Pagination.Item>
+                  ))}
+                  <Pagination.Next />
+                </Pagination>
+              </Card.Footer>
+            </>
+          )}
         </Card>
       </Col>
     </>

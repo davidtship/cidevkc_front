@@ -1,26 +1,39 @@
+// ... imports
 import { useEffect, useState, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuthContext } from '@/common'
+import { Button, Form, Stack, Alert } from 'react-bootstrap'
 import AuthLayout from '@/Layouts/AuthLayout'
 import TitleHelmet from '@/components/Common/TitleHelmet'
-import { Button, Form, Stack } from 'react-bootstrap'
 import AuthMinmal from './AuthMinmal'
+import FingerprintJS from '@fingerprintjs/fingerprintjs'
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "https://cidevkc-09c92764069d.herokuapp.com"
 
 const Login: React.FC = () => {
-  const [loading, setLoading] = useState<boolean>(false)
-  const [rememberMe, setRememberMe] = useState<boolean>(false)
+  const [loading, setLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const [emailError, setEmailError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
+  const [variant, setVariant] = useState<'success' | 'danger' | 'warning' | 'info'>('info')
+  const [deviceId, setDeviceId] = useState<string | null>(null)
   const navigate = useNavigate()
 
-   useEffect(() => {
-   document.cookie = "access"+"="+";"+" path=/";
-     document.cookie = "profilpicpath"+"="+";"+" path=/";
-     document.cookie = "firstname"+"="+";"+" path=/";
-    document.cookie = "lastname" + "=" + ";" + " path=/";
-  }, [])
+  useEffect(() => {
+    // Clear cookies au chargement
+    document.cookie = "access=; path=/"
+    document.cookie = "profilpicpath=; path=/"
+    document.cookie = "firstname=; path=/"
+    document.cookie = "lastname=; path=/"
+    document.cookie = "id=; path=/"
 
+    const loadFingerprint = async () => {
+      const fp = await FingerprintJS.load()
+      const result = await fp.get()
+      setDeviceId(result.visitorId)
+    }
+
+    loadFingerprint()
+  }, [])
 
   async function submitHandler(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -29,47 +42,81 @@ const Login: React.FC = () => {
     const username = fd.get('username')?.toString() || ''
     const password = fd.get('password')?.toString() || ''
 
-    if (username !== '' && password !== '') {
-      const formData = {
-        email: username,
-        password: password,
-      }
+    if (!username || !password) {
+      setVariant('warning')
+      setMessage('Veuillez remplir tous les champs.')
+      return
+    }
 
-      try {
-        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/auth/jwt/create/', {
-          method: 'POST',
-          body: JSON.stringify(formData),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+    if (!deviceId) {
+      setVariant('danger')
+      setMessage("Impossible d’identifier l’appareil.")
+      return
+    }
 
-        const resData = await res.json()
+    try {
+      setLoading(true)
 
-        if (resData.email === username) {
-          const { access, image, first_name, last_name, id } = resData
-          document.cookie = `access=${access}; path=/`
-          document.cookie = `profilpicpath=${image}; path=/`
-          document.cookie = `firstname=${first_name}; path=/`
-          document.cookie = `lastname=${last_name}; path=/`
-          document.cookie = `id=${id}; path=/`
-          alert('Connexion réussie !!')
-          navigate('/')
-        } else if (
-          resData.detail === 'No active account found with the given credentials'
-        ) {
-          alert('Votre compte a été désactivé, vous ne pouvez pas vous connecter')
-        } else if (resData.error === '21') {
-          alert('Vous ne pouvez pas vous connecter avec cet équipement')
+      // ➤ Étape 1 : Connexion pour récupérer le token
+      const loginRes = await fetch(`${API_URL}/auth/jwt/create/`, {
+        method: 'POST',
+        body: JSON.stringify({ email: username, password }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      const resData = await loginRes.json()
+
+      if (!loginRes.ok) {
+        if (resData?.detail?.includes('No active account')) {
+          setVariant('warning')
+          setMessage('Votre compte est désactivé.')
+        } else if (resData?.error === '18') {
+          setVariant('warning')
+          setMessage('Utilisateur inexistant.')
+        } else if (resData?.error === '19') {
+          setVariant('warning')
+          setMessage('Mot de passe incorrect.')
         } else {
-          alert('Mot de passe ou utilisateur incorrect !!')
+          setVariant('danger')
+          setMessage("Échec de connexion.")
         }
-      } catch (error) {
-        console.error('Login error:', error)
-        alert('Erreur lors de la connexion')
+        return
       }
-    } else {
-      alert('Veuillez remplir tous les champs !!!')
+
+      const { access, image, first_name, last_name, id } = resData
+
+      // ➤ Étape 2 : Vérifier l'appareil avec le token
+      const deviceRes = await fetch(`${API_URL}/api/check_device/?fingerprint=${deviceId}`, {
+        headers: {
+          Authorization: `Bearer ${access}`,
+        },
+      })
+
+      const deviceData = await deviceRes.json()
+
+      if (!deviceData.allowed) {
+        setVariant('danger')
+        setMessage("Appareil non autorisé. Contactez votre administrateur.")
+        return
+      }
+
+      // ➤ Étape 3 : Stocker les cookies
+      document.cookie = `access=${access}; path=/`
+      document.cookie = `profilpicpath=${image}; path=/`
+      document.cookie = `firstname=${first_name}; path=/`
+      document.cookie = `lastname=${last_name}; path=/`
+      document.cookie = `id=${id}; path=/`
+
+      setVariant('success')
+      setMessage('Connexion réussie ! Redirection...')
+      setTimeout(() => navigate('/'), 1500)
+
+    } catch (error) {
+      console.error('Erreur de connexion :', error)
+      setVariant('danger')
+      setMessage('Erreur réseau. Veuillez réessayer.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -82,6 +129,13 @@ const Login: React.FC = () => {
             <h4 className="fw-bold">Connectez-vous à votre compte</h4>
             <p>Entrez vos coordonnées pour vous connecter à votre compte.</p>
           </div>
+
+          {message && (
+            <Alert variant={variant} onClose={() => setMessage(null)} dismissible>
+              {message}
+            </Alert>
+          )}
+
           <Form onSubmit={submitHandler}>
             <Form.Group>
               <Form.Control
@@ -121,8 +175,8 @@ const Login: React.FC = () => {
             </Stack>
 
             <div className="d-grid gap-2 my-4">
-              <Button type="submit" variant="primary" className="text-white">
-                Se connecter
+              <Button type="submit" variant="primary" className="text-white" disabled={loading}>
+                {loading ? 'Connexion...' : 'Se connecter'}
               </Button>
             </div>
           </Form>

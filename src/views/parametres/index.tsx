@@ -10,24 +10,23 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-// Type for a single terminal item
+// Type des données reçues depuis l'API
 interface TerminalData {
-  adresse: string
-  model: string
+  device_uuid: string
+  device_name: string
+  fingerprint: string
   created_at: string
-  // You may add an `id: number` if you have one for delete/update/view logic
 }
 
 const style1: React.CSSProperties = {
   marginBottom: '3%',
 }
 
-const Formulaire: React.FC = () => {
+const ListeTerminaux: React.FC = () => {
   const [data, setData] = useState<TerminalData[]>([])
   const navigate = useNavigate()
 
-  // Get cookie value by name
-  function getCookie(name: string): string {
+  const getCookie = (name: string): string => {
     const value = `; ${document.cookie}`
     const parts = value.split(`; ${name}=`)
     if (parts.length === 2) return parts.pop()?.split(';').shift() || ''
@@ -46,11 +45,12 @@ const Formulaire: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         })
+
         const resData: TerminalData[] = await res.json()
         setData(resData)
-        console.log(JSON.stringify(resData))
+        console.log('Terminaux récupérés:', resData)
       } catch (err) {
-        console.error('Failed to fetch data:', err)
+        console.error('Erreur lors du chargement des terminaux:', err)
       }
     }
 
@@ -59,7 +59,7 @@ const Formulaire: React.FC = () => {
 
   return (
     <>
-      <h4 style={style1}>Parametres</h4>
+      <h4 style={style1}>Paramètres</h4>
       <Button
         style={{ width: '10%', marginBottom: '2.5%' }}
         onClick={() => navigate('/ajout_terminal')}
@@ -71,16 +71,16 @@ const Formulaire: React.FC = () => {
       <Col xl={12}>
         <Card>
           <Card.Header className="d-flex justify-content-between align-items-center">
-            <Card.Title>Liste des terminals</Card.Title>
+            <Card.Title>Liste des terminaux</Card.Title>
             <Dropdown className="ms-auto">
               <Dropdown.Toggle variant="light" className="p-0 btn-icon btn-md arrow-none">
                 <i className="fi fi-bs-menu-dots-vertical"></i>
               </Dropdown.Toggle>
               <Dropdown.Menu align="end">
-                <Dropdown.Item>Share</Dropdown.Item>
-                <Dropdown.Item>Refresh</Dropdown.Item>
+                <Dropdown.Item>Exporter</Dropdown.Item>
+                <Dropdown.Item>Rafraîchir</Dropdown.Item>
                 <DropdownDivider />
-                <Dropdown.Item>All Channels</Dropdown.Item>
+                <Dropdown.Item>Tous les appareils</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </Card.Header>
@@ -89,32 +89,32 @@ const Formulaire: React.FC = () => {
             <thead className="table-light">
               <tr>
                 <th>#</th>
-                <th>Model</th>
-                <th>Adresse</th>
-                <th>Date d'ajout</th>
-                <th>Action</th>
+                <th>Nom de l’appareil</th>
+                <th>UUID</th>
+                <th>Fingerprint</th>
+                <th>Date d’ajout</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {data.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center text-muted">
-                    Aucun formulaire trouvé.
+                    Aucun terminal enregistré.
                   </td>
                 </tr>
               ) : (
                 data.map((item, index) => (
                   <tr key={index}>
                     <td>{index + 1}</td>
-                    <td>{item.model}</td>
-                    <td>{item.adresse}</td>
-                    <td>{item.created_at}</td>
+                    <td>{item.device_name}</td>
+                    <td>{item.device_uuid}</td>
+                    <td>{item.fingerprint}</td>
+                    <td>{new Date(item.created_at).toLocaleString()}</td>
                     <td>
-                      <Link to={`/voir_reponses/1`}>
-                        <Button className="me-2" variant="danger">
-                          Supprimer
-                        </Button>
-                      </Link>
+                      <Button className="me-2" variant="danger" size="sm">
+                        Supprimer
+                      </Button>
                     </td>
                   </tr>
                 ))
@@ -125,7 +125,7 @@ const Formulaire: React.FC = () => {
           <Card.Footer className="border-top-0">
             <Pagination className="mb-0">
               <Pagination.Prev />
-              {[...Array(4)].map((_, index) => (
+              {[...Array(3)].map((_, index) => (
                 <Pagination.Item key={index}>{index + 1}</Pagination.Item>
               ))}
               <Pagination.Next />
@@ -137,4 +137,4 @@ const Formulaire: React.FC = () => {
   )
 }
 
-export default Formulaire
+export default ListeTerminaux

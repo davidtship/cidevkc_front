@@ -1,157 +1,91 @@
-import PageDashBreadcrumb from '@/components/Common/PageDashBreadcrumb'
-import { Col, Row, Button, Card, ProgressBar, Stack } from 'react-bootstrap'
-import { LatestLeads, LeadOverview, ProjectStatisticChart } from '../../components/Dashboards/CRM'
+import { useParams } from 'react-router-dom'
+import { Container, Row, Col, Card, Spinner } from 'react-bootstrap'
 import { useState, useEffect } from 'react'
 
-// Define the shape of your API response
-interface CountData {
-  formulaire?: number
-  user?: number
-  terminal?: number
+interface Choice {
+  option: string
 }
 
-const CRM: React.FC = () => {
-  const [number, setNumber] = useState<CountData>({})
+interface Question {
+  label: string
+  choices: Choice[]
+}
+
+interface Category {
+  title: string
+  questions: Question[]
+}
+
+const Formulaire = () => {
+  const { id } = useParams()
+  const [title, setTitle] = useState<string>('')
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    async function fetchForm(): Promise<void> {
+    async function fetchMyAPI() {
       try {
-        const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/get_count`, {
+        const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/getFormbyid/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         })
-        const resData: CountData = await res.json()
-        console.log(resData)
-        setNumber(resData)
-      } catch (error) {
-        console.error('Error fetching data:', error)
+        const resData = await res.json()
+        setTitle(resData.title)
+        setCategories(resData.categories)
+      } catch (err) {
+        console.error('Erreur lors du chargement du formulaire', err)
+      } finally {
+        setLoading(false)
       }
     }
 
-    fetchForm()
-  }, [])
+    fetchMyAPI()
+  }, [id])
 
   return (
-    <>
-      <PageDashBreadcrumb title="Dashboard" subName="Dashboards" />
-      <Row className="g-3 g-md-4">
-        <Col xl={12}>
-          <Row xl={3 as any}>
-            {/* Formulaires */}
-            <Col>
-              <Card>
-                <Card.Body>
-                  <Stack direction="horizontal" gap={4} className="mb-12 align-items-start">
-                    <Stack direction="horizontal" gap={4}>
-                      <div
-                        className="d-flex align-items-center justify-content-center rounded bg-primary-subtle text-primary"
-                        style={{ width: '3.5rem', height: '3.5rem' }}>
-                        <i className="fs-4 fi fi-rr-interrogation"></i>
-                      </div>
-                      <div>
-                        <div className="fs-24 fw-bold text-dark">{number.formulaire ?? 0}</div>
-                        <div>Formulaires</div>
-                      </div>
-                    </Stack>
-                    <Button variant="light" className="btn-icon btn-md ms-auto">
-                      <i className="fi fi-br-menu-dots-vertical"></i>
-                    </Button>
-                  </Stack>
-                  <div>
-                    <Stack direction="horizontal" gap={2} className="mb-2">
-                      <div>Formulaires</div>
-                      <div className="fs-13 ms-auto">
-                        Publié <span className="text-muted">(67%)</span>
-                      </div>
-                    </Stack>
-                    <ProgressBar variant="primary" now={67} style={{ height: '0.25rem' }} />
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
+    <Container className="my-5">
+      {loading ? (
+        <div className="d-flex justify-content-center align-items-center" style={{ height: '60vh' }}>
+          <Spinner animation="border" variant="primary" role="status">
+            <span className="visually-hidden">Chargement...</span>
+          </Spinner>
+        </div>
+      ) : (
+        <>
+          <h2 className="text-center mb-4">{title}</h2>
 
-            {/* Utilisateurs */}
-            <Col>
-              <Card>
-                <Card.Body>
-                  <Stack direction="horizontal" gap={4} className="mb-12 align-items-start">
-                    <Stack direction="horizontal" gap={4}>
-                      <div
-                        className="d-flex align-items-center justify-content-center rounded bg-danger-subtle text-danger"
-                        style={{ width: '3.5rem', height: '3.5rem' }}>
-                        <i className="fs-4 fi fi-rr-users"></i>
-                      </div>
-                      <div>
-                        <div className="fs-24 fw-bold text-dark">{number.user ?? 0}</div>
-                        <div>Utilisateurs</div>
-                      </div>
-                    </Stack>
-                    <Button variant="light" className="btn-icon btn-md ms-auto">
-                      <i className="fi fi-br-menu-dots-vertical"></i>
-                    </Button>
-                  </Stack>
-                  <div>
-                    <Stack direction="horizontal" gap={2} className="mb-2">
-                      <div>Utilisateurs</div>
-                      <div className="fs-13 ms-auto">
-                        Publié <span className="text-muted">(67%)</span>
-                      </div>
-                    </Stack>
-                    <ProgressBar variant="danger" now={67} style={{ height: '0.25rem' }} />
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
+          <Row className="justify-content-center">
+            <Col lg={10}>
+              {categories.map((category, index) => (
+                <Card key={index} className="mb-4 shadow-sm">
+                  <Card.Body>
+                    <h4 className="mb-3">
+                      Section {index + 1} : {category.title}
+                    </h4>
 
-            {/* Terminals */}
-            <Col>
-              <Card>
-                <Card.Body>
-                  <Stack direction="horizontal" gap={4} className="mb-12 align-items-start">
-                    <Stack direction="horizontal" gap={4}>
-                      <div
-                        className="d-flex align-items-center justify-content-center rounded bg-success-subtle text-success"
-                        style={{ width: '3.5rem', height: '3.5rem' }}>
-                        <i className="fs-4 fi fi-rr-laptop-mobile"></i>
+                    {category.questions.map((question, qIndex) => (
+                      <div key={qIndex} className="mb-3">
+                        <h5>{question.label}</h5>
+                        <ul className="ps-3">
+                          {question.choices.map((choice, cIndex) => (
+                            <li key={cIndex} style={{ fontSize: '1.1em' }}>
+                              {cIndex + 1}. {choice.option}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <div>
-                        <div className="fs-24 fw-bold text-dark">{number.terminal ?? 0}</div>
-                        <div>Terminals</div>
-                      </div>
-                    </Stack>
-                    <Button variant="light" className="btn-icon btn-md ms-auto">
-                      <i className="fi fi-br-menu-dots-vertical"></i>
-                    </Button>
-                  </Stack>
-                  <div>
-                    <Stack direction="horizontal" gap={2} className="mb-2">
-                      <div>Terminals</div>
-                      <div className="fs-13 ms-auto">
-                        En utilisation <span className="text-muted">(67%)</span>
-                      </div>
-                    </Stack>
-                    <ProgressBar variant="success" now={67} style={{ height: '0.25rem' }} />
-                  </div>
-                </Card.Body>
-              </Card>
+                    ))}
+                  </Card.Body>
+                </Card>
+              ))}
             </Col>
           </Row>
-        </Col>
-
-        <Col xl={8}>
-          <ProjectStatisticChart />
-        </Col>
-        <Col xl={4}>
-          <LeadOverview />
-        </Col>
-        <Col xl={18 as any}>
-          <LatestLeads />
-        </Col>
-      </Row>
-    </>
+        </>
+      )}
+    </Container>
   )
 }
 
-export default CRM
+export default Formulaire

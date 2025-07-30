@@ -1,7 +1,7 @@
 import configureBackend from './common/api/backend'
 import { AuthProvider, ThemeProvider } from './common/context'
 import ThemeRoutes from './routes/Routes'
-
+import DeviceAuth from './components/DeviceAuth'
 // Flaticons
 import './../node_modules/@flaticon/flaticon-uicons/css/all/all.css'
 
@@ -16,7 +16,7 @@ function App() {
       <AuthProvider>
         <ThemeRoutes />
       </AuthProvider>
-    </ThemeProvider>
+      </ThemeProvider>
   )
 }
 

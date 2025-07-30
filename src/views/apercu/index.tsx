@@ -1,4 +1,4 @@
-import { Form, Button, Col, Card } from 'react-bootstrap'
+import { Form, Button, Col, Card, Spinner, Container, Row } from 'react-bootstrap'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react'
 
@@ -35,6 +35,8 @@ const Formulaire: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([])
   const [token, setToken] = useState<string>('')
 
+  const [loading, setLoading] = useState<boolean>(true)
+
   const [shortAnswers, setShortAnswers] = useState<Record<number, string>>({})
   const [checkboxAnswers, setCheckboxAnswers] = useState<Record<number, string[]>>({})
   const [radioAnswers, setRadioAnswers] = useState<Record<number, string>>({})
@@ -57,15 +59,21 @@ const Formulaire: React.FC = () => {
     setToken(getCookie('access'))
 
     async function fetchForm() {
-      const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/getFormbyid/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      const resData: FormData = await res.json()
-      setTitle(resData.title)
-      setCategories(resData.categories)
+      try {
+        const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/getFormbyid/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        const resData: FormData = await res.json()
+        setTitle(resData.title)
+        setCategories(resData.categories)
+      } catch (err) {
+        console.error('Erreur lors de la récupération du formulaire', err)
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchForm()
@@ -100,12 +108,9 @@ const Formulaire: React.FC = () => {
       radioAnswers,
     }
 
-    const data = {
-      form: id,
-    }
+    const data = { form: id }
 
-    // Save form instance
-    const res1 = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/save_form', {
+    await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/save_form', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -114,10 +119,7 @@ const Formulaire: React.FC = () => {
       body: JSON.stringify(data),
     })
 
-    const resData1 = await res1.json()
-
-    // Save user responses
-    const res2 = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/save_response', {
+    await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/save_response', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -126,89 +128,88 @@ const Formulaire: React.FC = () => {
       body: JSON.stringify(payload),
     })
 
-    const resData2 = await res2.json()
-    console.log(resData2)
-
     navigate('/accuser_reception')
   }
 
   return (
-    <div>
-      <Form onSubmit={handleSubmit}>
-        <h1>{title}</h1>
-        <Col xl={18 as any}>
-          {categories.map((category, sectionIndex) => (
-            <Card key={sectionIndex} style={{ width: '70%', marginBottom: '20px' }}>
-              <Card.Body>
-                <h2>
-                  Section {sectionIndex + 1}: {category.title}
-                </h2>
-                <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
-                  {category.questions.map((question) => (
-                    <li key={question.id}>
-                      <h4 style={{ fontSize: '1.5em' }}>{question.label}</h4>
+    <Container className="my-5">
+      {loading ? (
+        <div className="d-flex justify-content-center align-items-center" style={{ height: '60vh' }}>
+          <Spinner animation="border" role="status" variant="primary">
+            <span className="visually-hidden">Chargement...</span>
+          </Spinner>
+        </div>
+      ) : (
+        <Form onSubmit={handleSubmit}>
+          <h2 className="mb-4 text-center">{title}</h2>
+          <Row className="justify-content-center">
+            <Col lg={10}>
+              {categories.map((category, sectionIndex) => (
+                <Card key={sectionIndex} className="mb-4 shadow-sm">
+                  <Card.Body>
+                    <h4 className="mb-3">
+                      Section {sectionIndex + 1}: {category.title}
+                    </h4>
+                    {category.questions.map((question) => (
+                      <div key={question.id} className="mb-4">
+                        <h5>{question.label}</h5>
 
-                      {question.question_type === 'short_answer' && (
-                        <Form.Control
-                          style={{
-                            fontSize: '1.3em',
-                            width: '200px',
-                            border: '0.1px black solid',
-                            marginBottom: '10px',
-                          }}
-                          type="text"
-                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                            handleShortAnswerChange(question.id, e.target.value)
-                          }
-                        />
-                      )}
-
-                      {question.question_type === 'checkboxes' &&
-                        question.choices.map((choice, i) => (
-                          <Form.Check
-                            style={{ fontSize: '1.3em' }}
-                            key={i}
-                            type="checkbox"
-                            label={choice.option}
-                            value={choice.option}
+                        {question.question_type === 'short_answer' && (
+                          <Form.Control
+                            type="text"
+                            className="mt-2"
+                            placeholder="Votre réponse"
                             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                              handleCheckboxChange(question.id, choice.option, e.target.checked)
+                              handleShortAnswerChange(question.id, e.target.value)
                             }
                           />
-                        ))}
+                        )}
 
-                      {question.question_type === 'multiple_choice' &&
-                        question.choices.map((choice, i) => (
-                          <Form.Check
-                            style={{ fontSize: '1.3em' }}
-                            key={i}
-                            type="radio"
-                            name={`radio-${question.id}`}
-                            label={choice.option}
-                            value={choice.option}
-                            checked={radioAnswers[question.id] === choice.option}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                              handleRadioChange(question.id, e.target.value)
-                            }
-                          />
-                        ))}
-                    </li>
-                  ))}
-                </ul>
-              </Card.Body>
-            </Card>
-          ))}
+                        {question.question_type === 'checkboxes' &&
+                          question.choices.map((choice, i) => (
+                            <Form.Check
+                              className="mt-2"
+                              key={i}
+                              type="checkbox"
+                              label={choice.option}
+                              value={choice.option}
+                              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                handleCheckboxChange(question.id, choice.option, e.target.checked)
+                              }
+                            />
+                          ))}
 
-          <Button
-            type="submit"
-            style={{ width: '10%', marginLeft: '2%', marginTop: '2.5%' }}
-            variant="primary"
-          >
-            Envoyer
-          </Button>
-        </Col>
-      </Form>
-    </div>
+                        {question.question_type === 'multiple_choice' &&
+                          question.choices.map((choice, i) => (
+                            <Form.Check
+                              className="mt-2"
+                              key={i}
+                              type="radio"
+                              name={`radio-${question.id}`}
+                              label={choice.option}
+                              value={choice.option}
+                              checked={radioAnswers[question.id] === choice.option}
+                              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                handleRadioChange(question.id, e.target.value)
+                              }
+                            />
+                          ))}
+                      </div>
+                    ))}
+                  </Card.Body>
+                </Card>
+              ))}
+
+              <div className="d-flex justify-content-center">
+                <Button type="submit" variant="primary" className="px-5 py-2">
+                  Envoyer
+                </Button>
+              </div>
+            </Col>
+          </Row>
+        </Form>
+      )}
+    </Container>
   )
 }
 
