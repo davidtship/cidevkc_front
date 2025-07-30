@@ -1,4 +1,3 @@
-// ... imports
 import { useEffect, useState, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button, Form, Stack, Alert } from 'react-bootstrap'
@@ -19,7 +18,6 @@ const Login: React.FC = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Clear cookies au chargement
     document.cookie = "access=; path=/"
     document.cookie = "profilpicpath=; path=/"
     document.cookie = "firstname=; path=/"
@@ -57,7 +55,7 @@ const Login: React.FC = () => {
     try {
       setLoading(true)
 
-      // ➤ Étape 1 : Connexion pour récupérer le token
+      // Étape 1 : Connexion - Récupération du token
       const loginRes = await fetch(`${API_URL}/auth/jwt/create/`, {
         method: 'POST',
         body: JSON.stringify({ email: username, password }),
@@ -85,7 +83,7 @@ const Login: React.FC = () => {
 
       const { access, image, first_name, last_name, id } = resData
 
-      // ➤ Étape 2 : Vérifier l'appareil avec le token
+      // Étape 2 : Vérification de l'appareil
       const deviceRes = await fetch(`${API_URL}/api/check_device/?fingerprint=${deviceId}`, {
         headers: {
           Authorization: `Bearer ${access}`,
@@ -94,13 +92,24 @@ const Login: React.FC = () => {
 
       const deviceData = await deviceRes.json()
 
-      if (!deviceData.allowed) {
+      // Étape 2.1 : Vérifier le rôle de l'utilisateur
+      const userRes = await fetch(`${API_URL}/auth/users/me/`, {
+        headers: {
+          Authorization: `Bearer ${access}`,
+        },
+      })
+
+      const userData = await userRes.json()
+      const isSuperAdmin = userData?.type_user === 'super_admin'
+
+      // Étape 2.2 : Refuser si appareil non autorisé et pas super admin
+      if (!deviceData.allowed && !isSuperAdmin) {
         setVariant('danger')
         setMessage("Appareil non autorisé. Contactez votre administrateur.")
         return
       }
 
-      // ➤ Étape 3 : Stocker les cookies
+      // Étape 3 : Stockage des cookies
       document.cookie = `access=${access}; path=/`
       document.cookie = `profilpicpath=${image}; path=/`
       document.cookie = `firstname=${first_name}; path=/`
