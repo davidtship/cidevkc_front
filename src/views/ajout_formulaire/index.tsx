@@ -261,7 +261,7 @@ const formatSection = (section: Section): any => ({
     sections: sections.map(formatSection),
   }
 
-  console.log("Payload envoyé :", JSON.stringify(finalData))
+  //console.log("Payload envoyé :", JSON.stringify(finalData))
 
   try {
     const response = await fetch(`${baseUrl}/api/formulaires/`, {
@@ -275,6 +275,7 @@ const formatSection = (section: Section): any => ({
     if (!response.ok) {
       const err = await response.json()
       console.error('Erreur backend:', err)
+      console.log(JSON.stringify(finalData))
       alert('Erreur à l’envoi du formulaire')
     } else {
       const data = await response.json()
@@ -282,6 +283,7 @@ const formatSection = (section: Section): any => ({
       alert('Formulaire envoyé avec succès')
     }
   } catch (error) {
+    
     console.error('Erreur réseau ou serveur:', error)
     alert('Erreur lors de l’envoi du formulaire')
   }
