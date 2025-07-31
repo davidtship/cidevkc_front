@@ -26,7 +26,8 @@ interface ReponseData {
 const VoirReponses: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [reponseData, setReponseData] = useState<ReponseData | null>(null);
-  const baseUrl = import.meta.env.VITE_API_BASE_URL
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
   function getCookie(name: string): string {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
@@ -68,14 +69,14 @@ const VoirReponses: React.FC = () => {
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-    // Amélioration de style
     const range = XLSX.utils.decode_range(ws['!ref']!);
+
     for (let R = range.s.r; R <= range.e.r; ++R) {
       for (let C = range.s.c; C <= range.e.c; ++C) {
         const cell_address = { c: C, r: R };
         const cell_ref = XLSX.utils.encode_cell(cell_address);
         if (!ws[cell_ref]) continue;
+
         ws[cell_ref].s = {
           font: {
             name: 'Arial',
@@ -97,7 +98,7 @@ const VoirReponses: React.FC = () => {
       }
     }
 
-    ws['!cols'] = [{ wch: 40 }, { wch: 60 }]; // largeur auto approx
+    ws['!cols'] = [{ wch: 40 }, { wch: 60 }];
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, reponseData.utilisateur);
@@ -114,7 +115,7 @@ const VoirReponses: React.FC = () => {
     const titreFormulaire = reponseData.formulaire.titre;
     const dateSoumission = new Date(reponseData.date_soumission).toLocaleString();
 
-    let pageHeight = doc.internal.pageSize.height;
+    const pageHeight = doc.internal.pageSize.height;
 
     doc.setFontSize(18);
     doc.text(titreFormulaire, 14, 20);
@@ -146,15 +147,16 @@ const VoirReponses: React.FC = () => {
         lineColor: [0, 0, 0],
         lineWidth: 0.1,
       },
-      didDrawPage: (data) => {
-        const pageCount = doc.internal.getNumberOfPages();
-        doc.setFontSize(9);
-        doc.text(`Page ${doc.internal.getCurrentPageInfo().pageNumber} / ${pageCount}`, doc.internal.pageSize.width - 40, pageHeight - 10);
-      },
+     didDrawPage: (data) => {
+  const pageCount = doc.getNumberOfPages();
+  const currentPage = doc.getCurrentPageInfo().pageNumber;
+  doc.setFontSize(9);
+  doc.text(`Page ${currentPage} / ${pageCount}`, doc.internal.pageSize.width - 40, pageHeight - 10);
+},
     });
 
+    const finalY = (doc as any).lastAutoTable?.finalY ?? 80;
     doc.setFontSize(10);
-    const finalY = doc.lastAutoTable.finalY || 80;
     doc.text('--- Merci pour votre participation ---', 14, finalY + 15);
     doc.text('Signature: ____________________________', 14, finalY + 25);
 
@@ -187,7 +189,6 @@ const VoirReponses: React.FC = () => {
           <Card style={{ width: '60%' }}>
             <Card.Body>
               <h2 style={{ fontSize: '1.6em' }}>Réponses :</h2>
-
               {reponseData.reponses.map((rep, index) => (
                 <div key={index} style={{ marginTop: 20 }}>
                   <h4 style={{ fontSize: '1.2em' }}>{rep.question}</h4>
