@@ -20,6 +20,7 @@ const Formulaire: React.FC = () => {
   const [data, setData] = useState<any[]>([]) // Placeholder, not used in form yet
   const navigate = useNavigate()
   const token = getCookie('access')
+  const baseUrl = import.meta.env.VITE_API_BASE_URL
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,7 +55,7 @@ const username = first_name + last_name
     }
 
     try {
-      const res  =  await fetch('https://cidevkc-09c92764069d.herokuapp.com/auth/users/', {
+      const res  =  await fetch(`${baseUrl}/auth/users/`, {
         method: 'POST',
         body: JSON.stringify(formData),
         headers: {

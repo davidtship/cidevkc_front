@@ -35,6 +35,7 @@ const style1: React.CSSProperties = {
 const Formulaire: React.FC = () => {
   const [data, setData] = useState<ResponseItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const baseUrl = import.meta.env.VITE_API_BASE_URL
   const navigate = useNavigate();
 
   function getCookie(name: string): string {
@@ -50,7 +51,7 @@ const Formulaire: React.FC = () => {
     setIsLoading(true);
     async function fetchData() {
       try {
-        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser', {
+        const res = await fetch(`${baseUrl}/api/returndataformuser`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -69,14 +70,14 @@ const Formulaire: React.FC = () => {
 
   async function changeStatus(pk: number) {
     try {
-      await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/changestatus/${pk}`, {
+      await fetch(`${baseUrl}/api/changestatus/${pk}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser/', {
+      const res = await fetch(`${baseUrl}/api/returndataformuser/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

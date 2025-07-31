@@ -1,0 +1,16 @@
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only-card {
+    width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

@@ -13,6 +13,7 @@ interface CountData {
 const CRM: React.FC = () => {
   const [number, setNumber] = useState<CountData>({})
   const [loading, setLoading] = useState<boolean>(true)
+  const baseUrl = import.meta.env.VITE_API_BASE_URL
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -36,7 +37,7 @@ const CRM: React.FC = () => {
     if (token !== '') {
       async function fetchForm() {
         try {
-          const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/get_count`, {
+          const res = await fetch(`${baseUrl}/api/get_count`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

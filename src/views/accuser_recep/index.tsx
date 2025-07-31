@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 const style1: React.CSSProperties = {
   marginBottom: '3%',
 }
-
+const baseUrl = import.meta.env.VITE_API_BASE_URL
 // Utility: get cookie by name
 function getCookie(name: string): string | undefined {
   const value = `; ${document.cookie}`
@@ -38,7 +38,7 @@ const Formulaire: React.FC = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser', {
+        const res = await fetch(`${baseUrl}/api/returndataformuser`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -57,14 +57,14 @@ const Formulaire: React.FC = () => {
 
   const changeStatus = async (pk: number) => {
     try {
-      await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/changestatus/${pk}`, {
+      await fetch(`${baseUrl}/api/changestatus/${pk}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       })
 
-      const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser/', {
+      const res = await fetch(`${baseUrl}/api/returndataformuser/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

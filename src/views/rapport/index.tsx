@@ -32,6 +32,7 @@ const style1: React.CSSProperties = {
 const Formulaire: React.FC = () => {
   const [data, setData] = useState<FormUserData[]>([])
   const navigate = useNavigate()
+  const baseUrl = import.meta.env.VITE_API_BASE_URL
 
   // Get cookie value by name
   function getCookie(name: string): string {
@@ -47,7 +48,7 @@ const Formulaire: React.FC = () => {
   useEffect(() => {
     async function fetchData(): Promise<void> {
       try {
-        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser', {
+        const res = await fetch(`${baseUrl}/api/returndataformuser`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -67,7 +68,7 @@ const Formulaire: React.FC = () => {
   // Toggle published status
   async function changeStatus(pk: number): Promise<void> {
     try {
-      await fetch(`http://localhost:/api/changestatus/${pk}`, {
+      await fetch(`${baseUrl}/api/changestatus/${pk}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +76,7 @@ const Formulaire: React.FC = () => {
       })
 
       // Refresh data
-      const res = await fetch('http://localhost:/api/returndataformuser/', {
+      const res = await fetch(`${baseUrl}/api/returndataformuser/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

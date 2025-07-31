@@ -30,6 +30,7 @@ const Formulaire = () => {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [userToDelete, setUserToDelete] = useState<number | null>(null)
+  const baseUrl = import.meta.env.VITE_API_BASE_URL
   const navigate = useNavigate()
 
   function getCookie(name: string): string {
@@ -44,7 +45,7 @@ const Formulaire = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/listeusers', {
+        const res = await fetch(`${baseUrl}/api/listeusers`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

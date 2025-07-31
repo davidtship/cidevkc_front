@@ -20,6 +20,7 @@ const DeviceIdentifier = () => {
   const [message, setMessage] = useState('')
   const [alreadyAuthorized, setAlreadyAuthorized] = useState(false)
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const baseUrl = import.meta.env.VITE_API_BASE_URL
 
   useEffect(() => {
     const init = async () => {
@@ -33,7 +34,7 @@ const DeviceIdentifier = () => {
 
       try {
         // Étape 1 : Récupérer le rôle de l'utilisateur
-        const userRes = await fetch('https://cidevkc-09c92764069d.herokuapp.com/auth/users/me', {
+        const userRes = await fetch(`${baseUrl}/auth/users/me`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -62,7 +63,7 @@ const DeviceIdentifier = () => {
         setDeviceUUID(localUUID)
 
         // Étape 3 : Vérifier si l’appareil est déjà autorisé
-        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/terminal', {
+        const res = await fetch(`${baseUrl}/api/terminal`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -112,7 +113,7 @@ const DeviceIdentifier = () => {
     setMessage('')
 
     try {
-      const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/save-device/', {
+      const res = await fetch(`${baseUrl}/api/save-device/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -166,7 +167,7 @@ const DeviceIdentifier = () => {
                     <Form.Label>Nom de l’appareil</Form.Label>
                     <Form.Control
                       type="text"
-                      placeholder="Ex: Mon téléphone perso"
+                      placeholder="Ex samsung, iphone ,hp,.."
                       value={deviceName}
                       onChange={(e) => setDeviceName(e.target.value)}
                       required

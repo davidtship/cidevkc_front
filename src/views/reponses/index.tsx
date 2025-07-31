@@ -7,31 +7,42 @@ import {
   Table,
   Pagination,
   Spinner,
+  Row,
+  Form,
 } from 'react-bootstrap'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-interface FormData {
-  id: number
-  user: {
-    first_name: string
-    last_name: string
-  }
-  form: {
-    id: number
-    title: string
-  }
-  created_at: string
-  statut: boolean
+interface Reponse {
+  question: string
+  valeur: string | string[]
 }
 
-const style1: React.CSSProperties = {
-  marginBottom: '3%',
+interface FormulaireReponse {
+  id: number
+  formulaire: {
+    id: number
+    titre: string
+  }
+  utilisateur: string
+  date_soumission: string
+  reponses: Reponse[]
 }
 
 const Formulaire: React.FC = () => {
-  const [data, setData] = useState<FormData[]>([])
+  const [data, setData] = useState<FormulaireReponse[]>([])
+  const [filteredData, setFilteredData] = useState<FormulaireReponse[]>([])
   const [loading, setLoading] = useState<boolean>(true)
+  const baseUrl = import.meta.env.VITE_API_BASE_URL
+  // Filtres
+  const [search, setSearch] = useState<string>('')
+  const [jour, setJour] = useState<string>('')
+  const [mois, setMois] = useState<string>('')
+  const [annee, setAnnee] = useState<string>('')
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const itemsPerPage = 5
 
   function getCookie(name: string): string {
     const value = `; ${document.cookie}`
@@ -45,17 +56,18 @@ const Formulaire: React.FC = () => {
   useEffect(() => {
     async function fetchData(): Promise<void> {
       try {
-        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser', {
+        const res = await fetch(`${baseUrl}/api/formulaires-reponses-liste/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
         })
-        const resData: FormData[] = await res.json()
+        const resData: FormulaireReponse[] = await res.json()
         setData(resData)
+        setFilteredData(resData)
       } catch (err) {
-        console.error('Failed to fetch data:', err)
+        console.error('Échec du chargement des données:', err)
       } finally {
         setLoading(false)
       }
@@ -64,30 +76,85 @@ const Formulaire: React.FC = () => {
     fetchData()
   }, [token])
 
-  async function changeStatus(pk: number): Promise<void> {
-    try {
-      await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/changestatus/${pk}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+  useEffect(() => {
+    let results = data
 
-      const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/returndataformuser/', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      const resData: FormData[] = await res.json()
-      setData(resData)
-    } catch (err) {
-      console.error('Failed to change status:', err)
+    // Recherche globale
+    if (search.trim() !== '') {
+      results = results.filter(
+        item =>
+          item.utilisateur.toLowerCase().includes(search.toLowerCase()) ||
+          item.formulaire.titre.toLowerCase().includes(search.toLowerCase())
+      )
     }
-  }
+
+    // Tri par date (jour, mois, année)
+    results = results.filter((item) => {
+      const date = new Date(item.date_soumission)
+      const matchJour = jour ? date.getDate() === parseInt(jour) : true
+      const matchMois = mois ? date.getMonth() + 1 === parseInt(mois) : true
+      const matchAnnee = annee ? date.getFullYear() === parseInt(annee) : true
+      return matchJour && matchMois && matchAnnee
+    })
+
+    setFilteredData(results)
+    setCurrentPage(1) // reset page on filter
+  }, [search, jour, mois, annee, data])
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   return (
     <>
-      <h4 style={style1}>Réponses</h4>
+      <h4 style={{ marginBottom: '3%' }}>Réponses</h4>
+
+      <Card className="mb-4">
+        <Card.Body>
+          <Row className="g-2">
+            <Col md={3}>
+              <Form.Control
+                placeholder="Rechercher..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </Col>
+            <Col md={2}>
+              <Form.Control
+                type="number"
+                placeholder="Jour"
+                value={jour}
+                onChange={(e) => setJour(e.target.value)}
+              />
+            </Col>
+            <Col md={2}>
+              <Form.Control
+                type="number"
+                placeholder="Mois"
+                value={mois}
+                onChange={(e) => setMois(e.target.value)}
+              />
+            </Col>
+            <Col md={2}>
+              <Form.Control
+                type="number"
+                placeholder="Année"
+                value={annee}
+                onChange={(e) => setAnnee(e.target.value)}
+              />
+            </Col>
+            <Col md={3}>
+              <Button variant="secondary" onClick={() => {
+                setSearch('')
+                setJour('')
+                setMois('')
+                setAnnee('')
+              }}>
+                Réinitialiser
+              </Button>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
 
       <Col xl={12}>
         <Card>
@@ -98,21 +165,19 @@ const Formulaire: React.FC = () => {
                 <i className="fi fi-bs-menu-dots-vertical"></i>
               </Dropdown.Toggle>
               <Dropdown.Menu align="end">
-                <Dropdown.Item>Share</Dropdown.Item>
-                <Dropdown.Item>Refresh</Dropdown.Item>
+                <Dropdown.Item>Partager</Dropdown.Item>
+                <Dropdown.Item>Rafraîchir</Dropdown.Item>
                 <DropdownDivider />
-                <Dropdown.Item>All Channels</Dropdown.Item>
+                <Dropdown.Item>Autres</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </Card.Header>
 
           {loading ? (
             <div className="text-center my-5">
-                <Spinner animation="border" role="status" variant="primary">
-                  <span className="visually-hidden">Chargement...</span>
-                </Spinner>
-                <div className="mt-2 text-muted">Chargement des reponses...</div>
-              </div>
+              <Spinner animation="border" variant="primary" />
+              <div className="mt-2 text-muted">Chargement des réponses...</div>
+            </div>
           ) : (
             <>
               <Table responsive bordered hover className="mb-0">
@@ -123,42 +188,26 @@ const Formulaire: React.FC = () => {
                     <th>Questionnaire</th>
                     <th>Date de soumission</th>
                     <th>Voir les réponses</th>
-                    <th>Date de création</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.length === 0 ? (
+                  {paginatedData.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center text-muted">
-                        Aucun formulaire trouvé.
+                      <td colSpan={5} className="text-center text-muted">
+                        Aucun résultat trouvé.
                       </td>
                     </tr>
                   ) : (
-                    data.map((item, index) => (
+                    paginatedData.map((item, index) => (
                       <tr key={item.id}>
-                        <td>{index + 1}</td>
+                        <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                        <td>{item.utilisateur}</td>
+                        <td>{item.formulaire.titre}</td>
+                        <td>{new Date(item.date_soumission).toLocaleString()}</td>
                         <td>
-                          {item.user.first_name} {item.user.last_name}
-                        </td>
-                        <td>{item.form.title}</td>
-                        <td>{item.created_at}</td>
-                        <td>
-                          <Link to={`/voir_reponses/${item.form.id}`}>
-                            <Button className="me-2" variant="success">
-                              Voir
-                            </Button>
+                          <Link to={`/voir_reponses/${item.id}`}>
+                            <Button variant="success" size="sm">Voir</Button>
                           </Link>
-                        </td>
-                        <td>
-                          {item.statut ? (
-                            <Link to={`/apercu/${item.id}`}>
-                              <Button variant="success">Aperçu</Button>
-                            </Link>
-                          ) : (
-                            <Button disabled variant="secondary">
-                              Non disponible
-                            </Button>
-                          )}
                         </td>
                       </tr>
                     ))
@@ -167,12 +216,18 @@ const Formulaire: React.FC = () => {
               </Table>
 
               <Card.Footer className="border-top-0">
-                <Pagination className="mb-0">
-                  <Pagination.Prev />
-                  {[...Array(4)].map((_, index) => (
-                    <Pagination.Item key={index}>{index + 1}</Pagination.Item>
+                <Pagination className="mb-0 justify-content-center">
+                  <Pagination.Prev onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} />
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <Pagination.Item
+                      key={i}
+                      active={currentPage === i + 1}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </Pagination.Item>
                   ))}
-                  <Pagination.Next />
+                  <Pagination.Next onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} />
                 </Pagination>
               </Card.Footer>
             </>

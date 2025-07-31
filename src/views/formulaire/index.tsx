@@ -1,220 +1,284 @@
-import {
-  Button,
-  Col,
-  Dropdown,
-  DropdownDivider,
-  Card,
-  Table,
-  Pagination,
-  Spinner,
-  Modal,
-} from 'react-bootstrap'
-import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { Button, Card, Table, Spinner, Row, Col, Modal, Form } from 'react-bootstrap'
+import { Link } from 'react-router-dom'
+
+interface Option {
+  id: number
+  texte: string
+}
+
+interface Question {
+  id: number
+  texte: string
+  type: string
+  options: Option[]
+}
+
+interface Section {
+  id: number
+  titre: string
+  questions: Question[]
+  sous_sections: Section[]
+}
 
 interface FormulaireData {
   id: number
-  title: string
-  lien: string
-  created_at: string
-  statut: boolean
+  titre: string
+  sections: Section[]
+  etat: boolean
+  date_creation: string
 }
 
-const style1: React.CSSProperties = {
-  marginBottom: '3%',
-}
+const ITEMS_PER_PAGE = 5
 
-const Formulaire: React.FC = () => {
+const ListeFormulaires = () => {
   const [data, setData] = useState<FormulaireData[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [showModal, setShowModal] = useState<boolean>(false)
-  const [selectedFormId, setSelectedFormId] = useState<number | null>(null)
+  const [filtered, setFiltered] = useState<FormulaireData[]>([])
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(true)
+  const baseUrl = import.meta.env.VITE_API_BASE_URL
 
-  const navigate = useNavigate()
+  // Filtres date + état
+  const [filterDay, setFilterDay] = useState('')
+  const [filterMonth, setFilterMonth] = useState('')
+  const [filterYear, setFilterYear] = useState('')
+  const [filterEtat, setFilterEtat] = useState('')
+
+  const [showModal, setShowModal] = useState(false)
+  const [formulaireASupprimer, setFormulaireASupprimer] = useState<number | null>(null)
+
+  const handleShowModal = (id: number) => {
+    setFormulaireASupprimer(id)
+    setShowModal(true)
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false)
+    setFormulaireASupprimer(null)
+  }
+
+  const handleDelete = async () => {
+    if (!formulaireASupprimer) return
+
+    try {
+      const response = await fetch(`${baseUrl}/api/formulaires/${formulaireASupprimer}/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const updated = data.filter((form) => form.id !== formulaireASupprimer)
+        setData(updated)
+      } else {
+        alert("Échec de la suppression.")
+      }
+    } catch (error) {
+      console.error("Erreur:", error)
+      alert("Une erreur est survenue.")
+    } finally {
+      handleCloseModal()
+    }
+  }
 
   useEffect(() => {
-    async function fetchMyAPI(): Promise<void> {
+    async function fetchFormulaires() {
       try {
-        const res = await fetch('https://cidevkc-09c92764069d.herokuapp.com/api/form', {
-          method: 'GET',
+        const response = await fetch(`${baseUrl}/api/list-formulaires/`, {
           headers: { 'Content-Type': 'application/json' },
         })
-        const resData: FormulaireData[] = await res.json()
-        setData(resData)
-      } catch (err) {
-        console.error('Failed to fetch forms:', err)
+        if (!response.ok) throw new Error('Erreur de chargement')
+        const result = await response.json()
+        setData(result)
+      } catch (error) {
+        console.error('Erreur:', error)
       } finally {
         setLoading(false)
       }
     }
-
-    fetchMyAPI()
+    fetchFormulaires()
   }, [])
 
-  async function changestatus(pk: number): Promise<void> {
-    try {
-      const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/changestatus/${pk}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      await res.json()
-      location.reload()
-    } catch (err) {
-      console.error('Failed to change status:', err)
+  // Filtres appliqués
+  useEffect(() => {
+    let results = data
+
+    if (search) {
+      results = results.filter((f) => f.titre.toLowerCase().includes(search.toLowerCase()))
     }
-  }
 
-  // ✅ Supprimer formulaire
-  const handleDelete = async () => {
-    if (!selectedFormId) return
-
-    try {
-      // 👉 Implémente ici la suppression API avec selectedFormId
-      // Exemple :
-      // await fetch(`https://yourapi.com/api/deleteform/${selectedFormId}`, {
-      //   method: 'DELETE',
-      //   headers: { 'Content-Type': 'application/json' },
-      // })
-
-      console.log(`Formulaire supprimé avec l'ID: ${selectedFormId}`)
-
-      // Après suppression, mets à jour les données localement :
-      setData(prev => prev.filter(form => form.id !== selectedFormId))
-    } catch (err) {
-      console.error('Erreur lors de la suppression:', err)
-    } finally {
-      setShowModal(false)
-      setSelectedFormId(null)
+    if (filterEtat !== '') {
+      const boolValue = filterEtat === 'publie'
+      results = results.filter((f) => f.etat === boolValue)
     }
-  }
+
+    results = results.filter((f) => {
+      const date = new Date(f.date_creation)
+      const matchesDay = filterDay ? date.getDate() === parseInt(filterDay) : true
+      const matchesMonth = filterMonth ? date.getMonth() + 1 === parseInt(filterMonth) : true
+      const matchesYear = filterYear ? date.getFullYear() === parseInt(filterYear) : true
+      return matchesDay && matchesMonth && matchesYear
+    })
+
+    results.sort((a, b) => new Date(b.date_creation).getTime() - new Date(a.date_creation).getTime())
+
+    setFiltered(results)
+    setPage(1)
+  }, [search, data, filterDay, filterMonth, filterYear, filterEtat])
+
+  const paginatedData = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
 
   return (
     <>
-      <h4 style={style1}>Questionnaires</h4>
+      <Card>
+        <Card.Body>
+          <Row className="mb-3">
+            <Col><h4>📋 Liste des formulaires</h4></Col>
+            <Col className="text-end">
+              <Link to="/ajouter_formulaire">
+                <Button variant="primary">Ajouter un formulaire</Button>
+              </Link>
+            </Col>
+          </Row>
 
-      <Button
-        style={{ width: '10%', marginBottom: '2.5%' }}
-        onClick={() => navigate('/ajouter_formulaire')}
-        variant="primary">
-        Ajouter
-      </Button>
-
-      <Col xl={12}>
-        <Card>
-          <Card.Header className="py-3 pe-3 d-flex justify-content-between align-items-center">
-            <Card.Title>Questionnaire</Card.Title>
-            <Dropdown className="ms-auto" drop="down">
-              <Dropdown.Toggle variant="light" className="p-0 btn-icon btn-md arrow-none">
-                <i className="fi fi-bs-menu-dots-vertical"></i>
-              </Dropdown.Toggle>
-              <Dropdown.Menu align="end" style={{ marginTop: '0.875rem' }}>
-                <Dropdown.Item><i className="fi fi-rr-share"></i> <span className="ms-3">Share</span></Dropdown.Item>
-                <Dropdown.Item><i className="fi fi-rr-refresh"></i> <span className="ms-3">Refresh</span></Dropdown.Item>
-                <DropdownDivider />
-                <Dropdown.Item><i className="fi fi-rr-stats"></i> <span className="ms-3">All Channels</span></Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          </Card.Header>
+          <Row className="mb-3 g-2">
+            <Col md={3}>
+              <Form.Control
+                placeholder="🔍 Rechercher par titre..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </Col>
+            <Col md={2}>
+              <Form.Control
+                placeholder="Jour (1-31)"
+                value={filterDay}
+                onChange={(e) => setFilterDay(e.target.value)}
+              />
+            </Col>
+            <Col md={2}>
+              <Form.Control
+                placeholder="Mois (1-12)"
+                value={filterMonth}
+                onChange={(e) => setFilterMonth(e.target.value)}
+              />
+            </Col>
+            <Col md={2}>
+              <Form.Control
+                placeholder="Année (ex: 2025)"
+                value={filterYear}
+                onChange={(e) => setFilterYear(e.target.value)}
+              />
+            </Col>
+            <Col md={3}>
+              <Form.Select value={filterEtat} onChange={(e) => setFilterEtat(e.target.value)}>
+                <option value="">Tous les états</option>
+                <option value="publie">Publié</option>
+                <option value="non_publie">Non publié</option>
+              </Form.Select>
+            </Col>
+          </Row>
 
           {loading ? (
-            <div className="text-center my-5">
-              <Spinner animation="border" role="status" variant="primary" />
-              <div className="mt-2 text-muted">Chargement des questionnaires...</div>
-            </div>
+            <div className="text-center"><Spinner animation="border" /></div>
           ) : (
             <>
-              <Table responsive className="mb-0">
+              <Table responsive bordered hover>
                 <thead>
-                  <tr className="border-b">
+                  <tr>
                     <th>Titre</th>
-                    <th>Status</th>
+                    <th>Contenu</th>
+                    <th>État</th>
                     <th>Action</th>
-                    <th>Lien</th>
                     <th>Date</th>
-                    <th>Utilisateurs</th>
+                    <th>Auteur</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.map(({ title, lien, id, created_at, statut }) => (
-                    <tr key={id}>
-                      <td>{title}</td>
+                  {paginatedData.map((formulaire) => (
+                    <tr key={formulaire.id}>
+                      <td>{formulaire.titre}</td>
                       <td>
-                        {statut ? (
-                          <span className="badge bg-primary-subtle text-primary">Publié</span>
-                        ) : (
-                          <span className="badge bg-secondary-subtle text-secondary">Non publié</span>
-                        )}
+                        <span className="badge bg-primary-subtle text-primary">
+                          {formulaire.sections.length > 0 ? 'Contenu présent' : 'Vide'}
+                        </span>
                       </td>
                       <td>
-                        <Button
-                          onClick={() => changestatus(id)}
-                          className="me-2"
-                          variant={statut ? 'secondary' : 'success'}>
-                          {statut ? 'Retirer' : 'Publier'}
-                        </Button>
-                        <Link to={`/voir_formulaire/${id}`}>
-                          <Button className="me-2" variant="primary">Voir</Button>
+                        {formulaire.etat
+                          ? <span className="badge bg-success-subtle text-success">Publié</span>
+                          : <span className="badge bg-danger-subtle text-danger">Non publié</span>
+                        }
+                      </td>
+                      <td>
+                        <Link to={`/voir_formulaire/${formulaire.id}`}>
+                          <Button size="sm" variant="success" className="me-1">Publier</Button>
                         </Link>
-                        <Button className="me-2" variant="secondary">Modifier</Button>
+                        <Link to={`/apercu/${formulaire.id}`}>
+                          <Button size="sm" variant="secondary" className="me-1">Essayer</Button>
+                        </Link>
+                        <Link to={`/voir_formulaire/${formulaire.id}`}>
+                          <Button size="sm" variant="primary" className="me-1">Voir</Button>
+                        </Link>
+                        <Link to={`/modifier/${formulaire.id}`}>
+                          <Button size="sm" variant="warning" className="me-1">Modifier</Button>
+                        </Link>
                         <Button
-                          className="me-2"
+                          size="sm"
                           variant="danger"
-                          onClick={() => {
-                            setSelectedFormId(id)
-                            setShowModal(true)
-                          }}>
+                          onClick={() => handleShowModal(formulaire.id)}
+                        >
                           Supprimer
                         </Button>
                       </td>
-                      <td>
-                        {statut ? (
-                          <Link to={`/apercu/${id}`}>
-                            <Button variant="success">Aperçu</Button>
-                          </Link>
-                        ) : (
-                          <Button disabled variant="secondary">Non disponible</Button>
-                        )}
-                      </td>
-                      <td>{created_at}</td>
+                      <td>{new Date(formulaire.date_creation).toLocaleDateString()}</td>
                       <td>davidtship</td>
                     </tr>
                   ))}
                 </tbody>
               </Table>
 
-              <Card.Footer className="border-top-0">
-                <Pagination className="mb-0">
-                  <Pagination.Prev />
-                  {[...Array(4)].map((_, index) => (
-                    <Pagination.Item key={index}>{index + 1}</Pagination.Item>
-                  ))}
-                  <Pagination.Next />
-                </Pagination>
-              </Card.Footer>
+              {/* Pagination */}
+              <div className="d-flex justify-content-between align-items-center mt-3">
+                <div>{filtered.length} résultats</div>
+                <div>
+                  <Button
+                    disabled={page === 1}
+                    onClick={() => setPage((prev) => prev - 1)}
+                    className="me-2"
+                  >
+                    Précédent
+                  </Button>
+                  Page {page} / {totalPages}
+                  <Button
+                    disabled={page === totalPages}
+                    onClick={() => setPage((prev) => prev + 1)}
+                    className="ms-2"
+                  >
+                    Suivant
+                  </Button>
+                </div>
+              </div>
             </>
           )}
-        </Card>
-      </Col>
+        </Card.Body>
+      </Card>
 
-      {/* ✅ MODAL DE CONFIRMATION */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+      {/* Modal suppression */}
+      <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Confirmation</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          Es-tu sûr de vouloir supprimer ce questionnaire ?
-        </Modal.Body>
+        <Modal.Body>Voulez-vous vraiment supprimer ce formulaire ?</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Annuler
-          </Button>
-          <Button variant="danger" onClick={handleDelete}>
-            Supprimer
-          </Button>
+          <Button variant="secondary" onClick={handleCloseModal}>Annuler</Button>
+          <Button variant="danger" onClick={handleDelete}>Supprimer</Button>
         </Modal.Footer>
       </Modal>
     </>
   )
 }
 
-export default Formulaire
+export default ListeFormulaires

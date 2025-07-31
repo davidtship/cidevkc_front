@@ -21,11 +21,11 @@ const Formulaire = () => {
   const [title, setTitle] = useState<string>('')
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState<boolean>(true)
-
+  const baseUrl = import.meta.env.VITE_API_BASE_URL
   useEffect(() => {
     async function fetchMyAPI() {
       try {
-        const res = await fetch(`https://cidevkc-09c92764069d.herokuapp.com/api/getFormbyid/${id}`, {
+        const res = await fetch(`${baseUrl}/api/getFormbyid/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
