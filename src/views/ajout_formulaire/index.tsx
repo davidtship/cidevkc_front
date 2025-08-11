@@ -261,8 +261,6 @@ const formatSection = (section: Section): any => ({
     sections: sections.map(formatSection),
   }
 
-  //console.log("Payload envoyé :", JSON.stringify(finalData))
-
   try {
     const response = await fetch(`${baseUrl}/api/formulaires/`, {
       method: 'POST',

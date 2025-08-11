@@ -6,7 +6,7 @@ import TitleHelmet from '@/components/Common/TitleHelmet'
 import AuthMinmal from './AuthMinmal'
 import FingerprintJS from '@fingerprintjs/fingerprintjs'
 
-const API_URL = "https://cidevkc-09c92764069d.herokuapp.com"
+const API_URL = "http://127.0.0.1:8000"
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false)
@@ -36,7 +36,7 @@ const Login: React.FC = () => {
   async function submitHandler(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
-
+    const email = fd.get('email')?.toString() || ''
     const username = fd.get('username')?.toString() || ''
     const password = fd.get('password')?.toString() || ''
 
@@ -58,12 +58,17 @@ const Login: React.FC = () => {
       // Étape 1 : Connexion - Récupération du token
       const loginRes = await fetch(`${API_URL}/auth/jwt/create/`, {
         method: 'POST',
-        body: JSON.stringify({ email: username, password }),
+        body: JSON.stringify(
+          {
+            username:username,
+            email: email,
+            password: password 
+        }),
         headers: { 'Content-Type': 'application/json' },
       })
 
       const resData = await loginRes.json()
-
+      console.log(resData)
       if (!loginRes.ok) {
         if (resData?.detail?.includes('No active account')) {
           setVariant('warning')
@@ -147,9 +152,17 @@ const Login: React.FC = () => {
 
           <Form onSubmit={submitHandler}>
             <Form.Group>
+               <Form.Control
+                type="text"
+                placeholder=""
+                value="cidev780@gmail.com"
+                required
+                name="email"
+                id="email"
+              />
               <Form.Control
                 type="text"
-                placeholder="Email"
+                placeholder="nom utilisateur"
                 required
                 name="username"
                 id="username"

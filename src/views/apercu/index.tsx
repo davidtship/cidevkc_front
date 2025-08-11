@@ -190,7 +190,10 @@ const RepondreFormulaire = () => {
 
         {success && (
           <Alert variant="success" className="mt-4">
-            ✅ Réponses enregistrées avec succès !
+            ✅ Vos informations ont été bien enregistrées et seront intégrées à la base de données de la cartographie des interventions au Kasaï central.
+Si vous souhaitez transmettre des informations complémentaires ou corriger des informations, vous pouvez nous contacter à l’adresse suivante : ou par téléphone +234 816 629 748.
+Votre contribution est précieuse pour améliorer la coordination et efficacité des interventions dans la province. Merci encore pour votre temps et votre engagement.
+Merci d’avoir rempli le formulaire.
           </Alert>
         )}
 
