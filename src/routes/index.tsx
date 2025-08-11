@@ -296,7 +296,7 @@ const appsRoutes: RoutesProps = {
     {
       path: '/formulaire',
       name: 'Formulaire',
-      element: <Formulaire />,
+      element: <Formulaire type_user="super_admin"/>,
       route: PrivateRoute,
     },
     {

@@ -32,9 +32,8 @@ interface FormulaireData {
 const ITEMS_PER_PAGE = 5
 
 interface ListeFormulairesProps {
-  type_user: string // Passe le type_user en prop
+  type_user: string
 }
-
 const ListeFormulaires = ({ type_user }: ListeFormulairesProps) => {
   const [data, setData] = useState<FormulaireData[]>([])
   const [filtered, setFiltered] = useState<FormulaireData[]>([])
