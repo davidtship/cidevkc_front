@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Button, Card, Table, Spinner, Row, Col, Modal, Form } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
+import { Button, Card, Table, Spinner, Row, Col, Modal, Form, Alert } from 'react-bootstrap'
+import { Link, useNavigate } from 'react-router-dom'
 
 interface Option {
   id: number
@@ -31,13 +31,18 @@ interface FormulaireData {
 
 const ITEMS_PER_PAGE = 5
 
-const ListeFormulaires = () => {
+interface ListeFormulairesProps {
+  type_user: string // Passe le type_user en prop
+}
+
+const ListeFormulaires = ({ type_user }: ListeFormulairesProps) => {
   const [data, setData] = useState<FormulaireData[]>([])
   const [filtered, setFiltered] = useState<FormulaireData[]>([])
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const baseUrl = import.meta.env.VITE_API_BASE_URL
+  const navigate = useNavigate()
 
   // Filtres date + état
   const [filterDay, setFilterDay] = useState('')
@@ -47,6 +52,16 @@ const ListeFormulaires = () => {
 
   const [showModal, setShowModal] = useState(false)
   const [formulaireASupprimer, setFormulaireASupprimer] = useState<number | null>(null)
+
+  // Gestion alerte
+  const [alerte, setAlerte] = useState<{ message: string; type: 'success' | 'danger' | 'info' | 'warning' } | null>(null)
+
+  useEffect(() => {
+    if (alerte) {
+      const timer = setTimeout(() => setAlerte(null), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [alerte])
 
   const handleShowModal = (id: number) => {
     setFormulaireASupprimer(id)
@@ -72,12 +87,13 @@ const ListeFormulaires = () => {
       if (response.ok) {
         const updated = data.filter((form) => form.id !== formulaireASupprimer)
         setData(updated)
+        setAlerte({ message: "Formulaire supprimé avec succès.", type: 'success' })
       } else {
-        alert("Échec de la suppression.")
+        setAlerte({ message: "Échec de la suppression.", type: 'danger' })
       }
     } catch (error) {
       console.error("Erreur:", error)
-      alert("Une erreur est survenue.")
+      setAlerte({ message: "Une erreur est survenue.", type: 'danger' })
     } finally {
       handleCloseModal()
     }
@@ -94,6 +110,7 @@ const ListeFormulaires = () => {
         setData(result)
       } catch (error) {
         console.error('Erreur:', error)
+        setAlerte({ message: "Erreur de chargement des formulaires.", type: 'danger' })
       } finally {
         setLoading(false)
       }
@@ -131,16 +148,32 @@ const ListeFormulaires = () => {
   const paginatedData = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
 
+  // Gère le clic sur "Ajouter un formulaire"
+  const handleAjouterClick = () => {
+    if (type_user !== 'super_admin') {
+      setAlerte({ message: "Vous n'êtes pas autorisé à ajouter un formulaire. Contactez l'administrateur.", type: 'warning' })
+      return
+    }
+    navigate('/ajouter_formulaire')
+  }
+
   return (
     <>
       <Card>
         <Card.Body>
+          {/* Affichage de l'alerte */}
+          {alerte && (
+            <Alert variant={alerte.type} onClose={() => setAlerte(null)} dismissible>
+              {alerte.message}
+            </Alert>
+          )}
+
           <Row className="mb-3">
             <Col><h4>📋 Liste des formulaires</h4></Col>
             <Col className="text-end">
-              <Link to="/ajouter_formulaire">
-                <Button variant="primary">Ajouter un formulaire</Button>
-              </Link>
+              <Button variant="primary" onClick={handleAjouterClick}>
+                Ajouter un formulaire
+              </Button>
             </Col>
           </Row>
 
@@ -213,25 +246,33 @@ const ListeFormulaires = () => {
                         }
                       </td>
                       <td>
-                        <Link to={`/voir_formulaire/${formulaire.id}`}>
-                          <Button size="sm" variant="success" className="me-1">Publier</Button>
-                        </Link>
-                        <Link to={`/apercu/${formulaire.id}`}>
-                          <Button size="sm" variant="secondary" className="me-1">Essayer</Button>
-                        </Link>
-                        <Link to={`/voir_formulaire/${formulaire.id}`}>
-                          <Button size="sm" variant="primary" className="me-1">Voir</Button>
-                        </Link>
-                        <Link to={`/modifier/${formulaire.id}`}>
-                          <Button size="sm" variant="warning" className="me-1">Modifier</Button>
-                        </Link>
-                        <Button
-                          size="sm"
-                          variant="danger"
-                          onClick={() => handleShowModal(formulaire.id)}
-                        >
-                          Supprimer
-                        </Button>
+                        {type_user === 'super_admin' ? (
+                          <>
+                            <Link to={`/voir_formulaire/${formulaire.id}`}>
+                              <Button size="sm" variant="success" className="me-1">Publier</Button>
+                            </Link>
+                            <Link to={`/apercu/${formulaire.id}`}>
+                              <Button size="sm" variant="secondary" className="me-1">Répondre</Button>
+                            </Link>
+                            <Link to={`/voir_formulaire/${formulaire.id}`}>
+                              <Button size="sm" variant="primary" className="me-1">Voir</Button>
+                            </Link>
+                            <Link to={`/modifier/${formulaire.id}`}>
+                              <Button size="sm" variant="warning" className="me-1">Modifier</Button>
+                            </Link>
+                            <Button
+                              size="sm"
+                              variant="danger"
+                              onClick={() => handleShowModal(formulaire.id)}
+                            >
+                              Supprimer
+                            </Button>
+                          </>
+                        ) : (
+                          <Link to={`/apercu/${formulaire.id}`}>
+                            <Button size="sm" variant="secondary">Répondre</Button>
+                          </Link>
+                        )}
                       </td>
                       <td>{new Date(formulaire.date_creation).toLocaleDateString()}</td>
                       <td>davidtship</td>

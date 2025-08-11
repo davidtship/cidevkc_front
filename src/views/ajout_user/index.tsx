@@ -5,7 +5,7 @@ import { useState } from 'react'
 const style1: React.CSSProperties = {
   marginBottom: '3%',
 }
-
+const API_URL = "https://cidevkc-09c92764069d.herokuapp.com"
 // Utility to get a cookie value by name
 function getCookie(name: string): string | undefined {
   const value = `; ${document.cookie}`
@@ -20,7 +20,7 @@ const Formulaire: React.FC = () => {
   const [data, setData] = useState<any[]>([]) // Placeholder, not used in form yet
   const navigate = useNavigate()
   const token = getCookie('access')
-  const baseUrl = import.meta.env.VITE_API_BASE_URL
+  const baseUrl = API_URL
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -95,9 +95,9 @@ const username = first_name + last_name
             </Form.Group>
 
             <Form.Group as={Row} className="mb-3" controlId="formEmail">
-              <Form.Label column sm={3}>Adresse email:</Form.Label>
+              <Form.Label column sm={3}>username:</Form.Label>
               <Col sm={9}>
-                <Form.Control name="email" type="email" placeholder="Entrez l'email" required />
+                <Form.Control name="username" type="username" placeholder="Entrez l'email" required />
               </Col>
             </Form.Group>
 

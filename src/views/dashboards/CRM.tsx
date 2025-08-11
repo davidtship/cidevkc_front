@@ -15,7 +15,7 @@ const CRM: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const baseUrl = import.meta.env.VITE_API_BASE_URL
   const navigate = useNavigate()
-
+ 
   useEffect(() => {
     function getCookie(cname: string) {
       let name = cname + '='
