@@ -6,7 +6,7 @@ import TitleHelmet from '@/components/Common/TitleHelmet'
 import AuthMinmal from './AuthMinmal'
 import FingerprintJS from '@fingerprintjs/fingerprintjs'
 
-const API_URL = "http://127.0.0.1:8000"
+const API_URL = "https://cidevkc-09c92764069d.herokuapp.com"
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false)
